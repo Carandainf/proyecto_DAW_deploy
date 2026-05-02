@@ -1,10 +1,8 @@
 // astro.config.mjs
-import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
+import { defineConfig } from "astro/config";
+import vercel from "@astrojs/vercel/serverless";
 
 export default defineConfig({
-  output: 'server',
-  adapter: node({
-    mode: 'standalone',
-  })
+  output: "server",
+  adapter: vercel(), // Para Vercel Serverless
 });
