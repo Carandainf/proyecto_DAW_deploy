@@ -1,23 +1,18 @@
-// import { PrismaClient } from "../../generated/prisma/client";
-import { PrismaClient } from "@prisma/client";
+import * as PrismaModule from "@prisma/client";
+const { PrismaClient } = PrismaModule;
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-/**
- * @description Singleton de Prisma para PostgreSQL usando el adaptador estándar 'pg'.
- */
-const connectionString = `${process.env.DATABASE_URL}`;
-
-// Creamos la conexión estándar
+const connectionString = process.env.DATABASE_URL!;
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 
+// Definimos el tipo correctamente para TypeScript
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+  prisma: typeof PrismaClient extends new () => infer T ? T : never;
 };
 
-// Pasamos el adaptador que TypeScript
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
+export const prisma = globalForPrisma.prisma || new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

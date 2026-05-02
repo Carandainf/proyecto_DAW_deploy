@@ -10,7 +10,7 @@ import nodemailer from "nodemailer";
  */
 export const auth = betterAuth({
   // Adaptador para conectar Better-Auth con nuestra base de datos vía Prisma
-  database: prismaAdapter(prisma, { provider: "sqlite" }),
+  database: prismaAdapter(prisma, { provider: "postgresql" }),
 
   emailAndPassword: {
     enabled: true,
