@@ -12,6 +12,8 @@ export const auth = betterAuth({
   // Adaptador para conectar Better-Auth con nuestra base de datos vía Prisma
   database: prismaAdapter(prisma, { provider: "postgresql" }),
 
+  trustedOrigins: ["http://localhost:4321", "https://proyecto-daw-deploy.vercel.app"],
+
   emailAndPassword: {
     enabled: true,
     /**

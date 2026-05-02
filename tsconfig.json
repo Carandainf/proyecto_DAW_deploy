@@ -9,7 +9,6 @@
     "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@prisma/*": ["./generated/prisma/*"],
       "@generated/*": ["./generated/*"]
     }
   }
