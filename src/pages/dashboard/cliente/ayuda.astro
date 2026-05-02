@@ -1,0 +1,187 @@
+---
+/**
+ * @file AyudaUser.astro
+ * @description Centro de ayuda y soporte para el área de clientes (dentistas).
+ * @author DentalLab Dev Team
+ * @version 1.1
+ * @changelog
+ * - Añadida guía sobre el uso de filtros y búsqueda en "Mis Trabajos".
+ * - Incorporada sección de recomendaciones para archivos .ZIP y .STL.
+ * - Añadida información sobre el seguimiento de estados en tiempo real.
+ */
+
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Centro de Ayuda - Área Cliente">
+  <main class="max-w-4xl mx-auto pt-24 px-6 mb-16">
+    <header class="mb-12 text-center">
+      <h1 class="text-4xl font-black uppercase tracking-tighter text-gradient">Centro de Ayuda</h1>
+      <p class="text-slate-400 mt-3 text-lg font-medium">
+        ¿Cómo podemos ayudarte hoy con tus archivos STL?
+      </p>
+    </header>
+
+    <div class="space-y-4">
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          ¿Cómo subo un nuevo trabajo?
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          Dirígete a la zona de <strong>"Nueva Orden"</strong>. Selecciona tu archivo <code
+            >.stl</code
+          >, añade una descripción detallada de lo que necesitas e indica su prioridad. Por último,
+          pulsa "Enviar". El sistema te notificará en cuanto el laboratorio comience a trabajar en
+          tu pedido.
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          ¿Qué formatos de archivo aceptáis?
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          Solo admitimos archivos en formato <strong>.STL</strong>.
+          <br /><br />
+          <strong>Importante sobre la carga múltiple:</strong> Si necesitas enviar varios archivos, debes
+          seleccionarlos todos a la vez desde tu gestor de archivos o arrastrarlos juntos al área de carga.
+          <br />
+          <span class="text-red-500 font-bold">No los subas de uno en uno</span>, ya que cada carga
+          nueva reemplazará a la anterior y solo se guardará el último archivo seleccionado.
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          ¿Cómo encuentro un pedido antiguo rápidamente?
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          En el panel principal, en la zona de <strong>"Estados Recientes"</strong>, solo se
+          muestran tus últimos 5 trabajos pendientes. Si buscas un pedido que no aparece ahí o
+          quieres consultar el historial completo:
+          <br /><br />
+          <ul class="list-disc ml-5 mt-2 space-y-1">
+            <li>
+              Haz clic en el enlace <strong>"Ver todo..."</strong> para acceder al listado completo de
+              tus archivos.
+            </li>
+            <li>
+              <strong>Buscador:</strong> Escribe el nombre del trabajo para localizarlo al instante.
+            </li>
+            <li>
+              <strong>Filtro de Estado:</strong> Permite filtrar entre "Pendientes", "En Proceso" o "Completados"
+              para organizar mejor tu flujo de trabajo.
+            </li>
+          </ul>
+        </div>
+      </details>
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          ¿Cómo reviso el estado de mi pedido?
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4">
+          En tu Dashboard verás la tabla con tus trabajos. Para ver el estado más reciente,
+          asegúrate de <strong>recargar la página</strong>, ya que el sistema actualizará la
+          información con los últimos cambios realizados por el laboratorio:
+          <ul class="list-disc ml-5 mt-2 space-y-1">
+            <li>
+              <strong class="text-amber-600">Pendiente:</strong> El laboratorio ha recibido el archivo
+              y está en cola de revisión.
+            </li>
+            <li>
+              <strong class="text-cyan-600">En Proceso:</strong> El técnico ya está trabajando en el diseño
+              o fabricación.
+            </li>
+            <li>
+              <strong class="text-emerald-600">Completado:</strong> Tu trabajo está listo para ser revisado
+              o descargado.
+            </li>
+          </ul>
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          ¿Qué son los "Mensajes del Lab" en mi panel?
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          La sección <strong>"Mensajes del Lab"</strong> muestra un resumen con las 5 notificaciones o
+          actualizaciones más recientes enviadas por el laboratorio.
+          <br /><br />
+          Ten en cuenta que esta vista es solo informativa. Si necesitas ver el historial completo de
+          la conversación, adjuntar archivos adicionales o consultar detalles técnicos específicos de
+          un pedido, <strong>haz clic sobre el mensaje</strong>. Esto te redirigirá directamente al
+          trabajo correspondiente, donde podrás gestionar la comunicación de manera centralizada.
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          ¿Cómo contacto con el técnico?
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4">
+          Para dudas sobre un modelo concreto, entra en los detalles del pedido y usa el <strong
+            >chat interno</strong
+          >. Es la vía más rápida para adjuntar aclaraciones o resolver dudas sobre la malla 3D sin
+          llamadas telefónicas.
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          Seguridad y cierre de sesión
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          <ul class="list-disc ml-5 mt-2 space-y-1">
+            <li>
+              <strong>Sesión activa:</strong> Por comodidad, la sesión no se cierra al cerrar la pestaña.
+            </li>
+            <li>
+              <strong>Privacidad:</strong> Si accedes desde la clínica y compartes equipo con otros compañeros,
+              te recomendamos encarecidamente usar el botón <strong>"Salir"</strong> al terminar tu gestión.
+            </li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="mt-12 text-center">
+      <a href="/dashboard/cliente" class="btn-primary"> ← Volver al Dashboard </a>
+    </div>
+  </main>
+</Layout>

@@ -1,0 +1,91 @@
+---
+/**
+ * @file TechStack.astro
+ * @description Sección bento-grid con estética unificada a la web (colores suaves).
+ */
+
+const tecnologias = [
+  {
+    id: "cadcam",
+    title: "CAD/CAM Design",
+    desc: "Precisión micrónica",
+    longDesc:
+      "Utilizamos software exocad de última generación para diseñar prótesis con un ajuste marginal perfecto, garantizando una oclusión natural y una durabilidad superior.",
+    img: "/tecnologia/fresadora-dental-pro.webp",
+    size: "md:col-span-2",
+    icon: "💻",
+  },
+  {
+    id: "laser",
+    title: "Sinterizado",
+    desc: "Metalurgia láser",
+    longDesc:
+      "Nuestra tecnología de sinterizado láser elimina las tensiones internas del metal, ofreciendo estructuras ligeras y extremadamente resistentes.",
+    img: "/tecnologia/sinterizado-laser.webp",
+    size: "md:col-span-1",
+    icon: "🔥",
+  },
+  {
+    id: "3d",
+    title: "Impresión 3D",
+    desc: "Bio-resinas SLA",
+    longDesc:
+      "Impresión de alta resolución para guías quirúrgicas y modelos de estudio con precisión de 50 micras.",
+    img: "/tecnologia/impresora-3d-dental.webp",
+    size: "md:col-span-3",
+    icon: "🖨️",
+  },
+];
+---
+
+<section id="tecnologia" class="scroll-mt-24 mt-20">
+  <header class="max-w-3xl mb-12 mx-auto text-center">
+    <h2 class="text-3xl md:text-5xl font-black text-dent-dark italic uppercase tracking-tighter">
+      Flujo <span class="text-dent-accent">Digital 3.0</span>
+    </h2>
+    <p class="text-slate-500 text-xs uppercase tracking-[0.3em] mt-4 font-bold">
+      Nuestro Laboratorio: Donde el bit se convierte en átomo
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[300px]">
+    {
+      tecnologias.map((item) => (
+        <div
+          class={`group relative overflow-hidden rounded-[2.5rem] border border-dent-border bg-dent-card shadow-sm hover:shadow-xl transition-all duration-500 ${item.size}`}
+        >
+          <div class="absolute inset-0 z-0">
+            <img
+              src={item.img}
+              alt={item.title}
+              class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-700"
+            />
+            <!-- Overlay idéntico al de Servicios -->
+            <div class="absolute inset-0 bg-linear-to-t from-dent-dark/95 via-dent-dark/20 to-transparent opacity-90" />
+          </div>
+
+          <div class="relative z-10 p-8 h-full flex flex-col justify-end">
+            <div class="relative">
+              <!-- Detalle visual en hover copiado de Servicios -->
+              <div class="absolute -left-4 top-0 bottom-0 w-1 bg-dent-accent scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-bottom shadow-[0_0_10px_rgba(14,165,233,0.5)]" />
+              
+              <div class="flex items-center gap-3 mb-2">
+                <span class="text-2xl drop-shadow-md">{item.icon}</span>
+                <h3 class="text-xl md:text-2xl font-black text-white italic uppercase drop-shadow-lg leading-none">
+                  {item.title}
+                </h3>
+              </div>
+            </div>
+            
+            <p class="text-dent-accent font-bold text-xs uppercase tracking-widest mb-2 opacity-90">
+              {item.desc}
+            </p>
+            <p class="text-slate-200 text-sm leading-relaxed max-w-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 italic">
+              {item.longDesc}
+            </p>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>

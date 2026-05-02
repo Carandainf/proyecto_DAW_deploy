@@ -1,0 +1,179 @@
+---
+/**
+ * @file AyudaAdmin.astro
+ * @description Centro de soporte y guía operativa para el panel de administración.
+ * @author DentalLab Dev Team
+ * @version 1.2
+ * @changelog
+ * - Se establecen los estilos de visibilidad y contraste (text-gradient, text-dent-dark).
+ * - Se establece la sección de "Filtros y Búsquedas" para optimizar la gestión de tablas.
+ * - Se establece la sección de "Gestión STL" para especificaciones técnicas.
+ * - Se sincroniza la explicación del generador PDF con los filtros dinámicos.
+ */
+
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Ayuda - Panel de Control">
+  <main class="max-w-4xl mx-auto pt-24 px-6 mb-12">
+    <header class="mb-12 text-center">
+      <h1 class="text-4xl font-black uppercase tracking-tighter text-gradient">
+        Centro de Soporte Admin
+      </h1>
+      <p class="text-slate-400 mt-3 text-lg font-medium">
+        Guía operativa para la gestión del laboratorio dental
+      </p>
+    </header>
+
+    <div class="space-y-4">
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          ¿Cómo registrar un nuevo usuario / dentista?
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          Para dar de alta a un nuevo cliente:
+          <ol class="list-decimal ml-5 mt-2 space-y-1">
+            <li>Accede a la sección <strong>"Gestión Clientes"</strong> desde el Dashboard.</li>
+            <li>Pulsa el botón <strong>"Nuevo Registro"</strong>.</li>
+            <li>Completa el formulario con el email profesional y el nombre del usuario.</li>
+            <li>El sistema enviará automáticamente una invitación al usuario.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          ¿Cómo cambio el estado de un pedido?
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          Localiza el trabajo en la tabla del Dashboard. Haz clic en el selector de estado y elige
+          entre:
+          <ul class="list-disc ml-5 mt-2">
+            <li><strong>Pendiente:</strong> Recibido, esperando revisión técnica.</li>
+            <li><strong>En Proceso:</strong> Archivo enviado a impresión o fresado.</li>
+            <li><strong>Completado:</strong> Trabajo finalizado y listo para entrega.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          Uso de filtros y búsquedas avanzadas
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          Para gestionar grandes volúmenes de datos en Historial o Mensajes:
+          <ul class="list-disc ml-5 mt-2 space-y-1">
+            <li>
+              <strong>Buscador:</strong> Filtra por nombre de cliente o nombre de archivo en tiempo real.
+            </li>
+            <li>
+              <strong>Desplegable de Estado:</strong> Visualiza solo trabajos "Pendientes" o "Completados".
+            </li>
+            <li>
+              <strong>Combinación:</strong> Los filtros son acumulativos para búsquedas más precisas.
+            </li>
+          </ul>
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          Gestión de Mensajes y Chat
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          Utiliza el icono de chat dentro de cada trabajo para comunicarte directamente con el
+          cliente. Para consultas generales de la web, revisa la sección <strong>"Mensajes"</strong
+          >, donde podrás responder y archivar las solicitudes de contacto.
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          ¿Cómo genero un informe PDF?
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          Accede a la pestaña de <strong>"Historial"</strong>. Verás un botón de <strong
+            >Exportar PDF</strong
+          >.
+          <br /><br />
+          <em class="text-sm border-l-2 border-dent-accent pl-2 italic">
+            Importante: Si tienes filtros aplicados, el PDF solo incluirá los registros visibles en
+            ese momento.
+          </em>
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          Visualización y descarga de archivos .STL
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          Desde la consola de gestión de cada pedido:
+          <ul class="list-disc ml-5 mt-2 space-y-1">
+            <li>Haz clic en el icono de descarga para obtener el archivo de diseño.</li>
+            <li>Verifica la integridad del archivo antes de cambiar el estado a "En Proceso".</li>
+          </ul>
+        </div>
+      </details>
+
+      <details
+        class="group bg-dent-card border border-dent-border rounded-xl p-5 hover:border-dent-accent transition-all duration-300"
+      >
+        <summary
+          class="font-bold text-dent-dark text-lg cursor-pointer list-none flex justify-between items-center"
+        >
+          Seguridad y cierre de sesión
+          <span class="transition group-open:rotate-180 text-dent-accent">▼</span>
+        </summary>
+        <div class="text-slate-500 mt-4 border-t border-dent-border pt-4 leading-relaxed">
+          Para proteger tu cuenta, ten en cuenta lo siguiente:
+          <ul class="list-disc ml-5 mt-2 space-y-1">
+            <li>
+              <strong>Cierre de sesión:</strong> Si cierras la pestaña sin usar el botón <strong
+                >"Salir"</strong
+              >, tu sesión permanecerá activa.
+            </li>
+            <li>
+              <strong>Recomendación:</strong> Siempre utiliza el botón <strong>"Salir"</strong> al terminar,
+              especialmente si compartes el equipo.
+            </li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="mt-12 text-center">
+      <a href="/dashboard/admin" class="btn-primary"> ← Volver al Dashboard </a>
+    </div>
+  </main>
+</Layout>

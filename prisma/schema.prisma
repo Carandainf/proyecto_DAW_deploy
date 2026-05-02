@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Mis tablas
+// --- TABLA DE ROLES (Mi diseño original) ---
+model Role {
+  id          Int     @id @default(autoincrement()) @map("id_rol")
+  nombre      String  @unique @map("nombre_rol")
+  descripcion String?
+  usuarios    User[]
+
+  @@map("roles")
+}
+
+// --- TABLA DE USUARIOS (Better-Auth + Mi lógica) ---
+model User {
+  id            String   @id // Better-Auth genera esto automáticamente, tiene que ser de tipo string es más seguro
+  name          String   @map("nombre")
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Conexión con mi tabla de Roles
+  roleId  Int?  @map("id_rol")
+  roleRel Role? @relation(fields: [roleId], references: [id])
+
+  // Campos para el Plugin Admin de Better-Auth (Control de acceso rápido)
+  role       String?   @default("user") // "admin" o "user"
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime?
+
+  // --- MIS TABLAS DE NEGOCIO ---
+  archivos    Archivo[]
+  mensajesEnv Mensaje[]  @relation("Enviados")
+  contactos   Contacto[]
+
+  // Better-Auth Core
+  sessions Session[]
+  accounts Account[]
+
+  @@map("usuarios")
+}
+
+// --- TABLAS OBLIGATORIAS BETTER-AUTH ---
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sesiones")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("cuentas")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verificaciones")
+}
+
+// --- MIS TABLAS DE NEGOCIO ---
+
+model Archivo {
+  id_archivo      Int       @id @default(autoincrement())
+  id_usuario      String
+  nombre_archivo  String
+  url_path        String    @default("")
+  estado          String    @default("pendiente")
+  prioridad       String    @default("normal")
+  descripcion     String?
+  fecha_subida    DateTime  @default(now())
+  fecha_recepcion DateTime?
+  usuario         User      @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+
+  mensajes Mensaje[]
+
+  @@map("archivos")
+}
+
+model Mensaje {
+  id_mensaje  Int      @id @default(autoincrement())
+  id_emisor   String
+  id_archivo  Int
+  contenido   String
+  fecha_envio DateTime @default(now())
+  emisor      User     @relation("Enviados", fields: [id_emisor], references: [id], onDelete: Cascade)
+  archivo     Archivo  @relation(fields: [id_archivo], references: [id_archivo], onDelete: Cascade)
+
+  @@map("mensajes")
+}
+
+model Contacto {
+  id_contacto   Int       @id @default(autoincrement())
+  nombre        String
+  email         String
+  asunto        String
+  mensaje       String
+  leido         Boolean   @default(false)
+  fecha_envio   DateTime  @default(now())
+  // trazabilidad para gestionar los cambios
+  id_admin      String?
+  fecha_gestion DateTime?
+  admin         User?     @relation(fields: [id_admin], references: [id], onDelete: SetNull)
+
+  @@map("contactos")
+}

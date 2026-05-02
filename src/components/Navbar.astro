@@ -1,0 +1,212 @@
+---
+/**
+ * @file Navbar.astro
+ * @description Barra de navegación optimizada con renderizado condicional.
+ */
+import { getUserRole } from "@/lib/auth";
+
+const { loggedIn, role } = await getUserRole(Astro.request);
+const pathname = new URL(Astro.request.url).pathname;
+const isAdmin = role === "admin";
+const isLanding = pathname === "/";
+---
+
+<header
+  id="main-nav"
+  class="fixed top-4 inset-x-0 z-[100] flex justify-center px-4 pointer-events-none transition-all duration-500"
+>
+  <nav
+    id="nav-inner"
+    class={`pointer-events-auto backdrop-blur-xl border px-6 h-12 rounded-full flex items-center transition-all duration-500 ${
+      isLanding ? "justify-between w-full max-w-5xl" : "justify-center gap-8 w-auto px-8"
+    } ${
+      isLanding
+        ? "bg-slate-900/80 border-white/20 shadow-[0_0_15px_rgba(14,165,233,0.1)]"
+        : "bg-slate-800/90 border-white/20 shadow-[0_0_25px_rgba(14,165,233,0.15)]"
+    }`}
+  >
+    <a href="/" class="flex items-center gap-3 group transition-transform active:scale-95">
+      <div
+        class="w-7 h-7 bg-dent-accent rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:rotate-3 transition-transform"
+      >
+        <span class="text-dent-dark font-black text-lg">D</span>
+      </div>
+      <span class="text-slate-100 font-bold tracking-tighter italic text-sm hidden sm:block">
+        Dental<span class="text-dent-accent">Lab</span>
+      </span>
+    </a>
+
+    <ul class="flex items-center gap-4 md:gap-6">
+      {
+        isLanding && (
+          <>
+            <li class="hidden xl:block">
+              <a
+                href="#servicios"
+                class="text-[10px] uppercase font-bold tracking-[0.15em] text-slate-200 hover:text-dent-accent transition-all"
+              >
+                Servicios
+              </a>
+            </li>
+            <li class="hidden xl:block">
+              <a
+                href="#tecnologia"
+                class="text-[10px] uppercase font-bold tracking-[0.15em] text-slate-200 hover:text-dent-accent transition-all"
+              >
+                Tecnología
+              </a>
+            </li>
+            <li class="hidden lg:block">
+              <a
+                href="#equipo"
+                class="text-[10px] uppercase font-bold tracking-[0.15em] text-slate-200 hover:text-dent-accent transition-all"
+              >
+                Equipo
+              </a>
+            </li>
+            <li class="hidden lg:block">
+              <a
+                href="#faq"
+                class="text-[10px] uppercase font-bold tracking-[0.15em] text-slate-200 hover:text-dent-accent transition-all"
+              >
+                FAQ
+              </a>
+            </li>
+            <li class="hidden sm:block">
+              <a
+                href="#contacto"
+                class="text-[10px] uppercase font-bold tracking-[0.15em] text-slate-200 hover:text-dent-accent transition-all"
+              >
+                Contacto
+              </a>
+            </li>
+          </>
+        )
+      }
+
+      {
+        loggedIn ? (
+          <>
+            {/* Nuevo enlace de Ayuda */}
+            <li>
+              <a
+                href={isAdmin ? "/dashboard/admin/ayuda" : "/dashboard/cliente/ayuda"}
+                class={`text-[9px] uppercase font-black tracking-[0.2em] transition-all flex items-center gap-2 ${
+                  pathname.includes("/ayuda")
+                    ? "text-dent-accent"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Ayuda
+              </a>
+            </li>
+            <div class="w-px h-3 bg-white/10" />
+
+            {/* Enlace al Dashboard */}
+            <li>
+              <a
+                href={isAdmin ? "/dashboard/admin" : "/dashboard/cliente"}
+                class={`text-[9px] uppercase font-black tracking-[0.2em] transition-all flex items-center gap-2 ${
+                  pathname.includes("/dashboard") && !pathname.includes("/ayuda")
+                    ? isAdmin
+                      ? "text-red-400"
+                      : "text-dent-accent"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <span
+                  class={`w-1 h-1 rounded-full animate-pulse ${isAdmin ? "bg-red-500" : "bg-dent-accent"}`}
+                />
+                {isAdmin ? "Admin" : "Panel"}
+              </a>
+            </li>
+            <div class="w-px h-3 bg-white/10" />
+
+            {/* Botón Salir */}
+            <li>
+              <button class="logout-button-trigger group flex items-center gap-2 text-[9px] font-black text-slate-500 hover:text-red-400 transition-all uppercase tracking-[0.2em] cursor-pointer">
+                <span class="hidden md:inline">Salir</span>
+              </button>
+            </li>
+          </>
+        ) : (
+          // ... código si no está logueado
+          <li>
+            <a
+              href="/#login-section"
+              class="bg-dent-accent text-dent-dark px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white transition-all shadow-lg shadow-cyan-500/20"
+            >
+              Entrar
+            </a>
+          </li>
+        )
+      }
+    </ul>
+  </nav>
+</header>
+
+<script>
+  /**
+   * @description Gestión del Cierre de Sesión (Logout).
+   */
+  const setupLogout = () => {
+    const logoutButtons = document.querySelectorAll(".logout-button-trigger");
+
+    logoutButtons.forEach((btn) => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode?.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        console.log("Cerrando sesión...");
+
+        try {
+          const res = await fetch("/api/auth/sign-out", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}),
+          });
+
+          if (res.ok) {
+            window.location.replace("/");
+          } else {
+            console.error("Error en la respuesta del servidor");
+          }
+        } catch (err) {
+          console.error("Error crítico al cerrar sesión:", err);
+        }
+      });
+    });
+  };
+
+  /**
+   * @description Lógica de Scroll suavizada.
+   */
+  const handleScroll = () => {
+    const nav = document.getElementById("main-nav");
+    const inner = document.getElementById("nav-inner");
+    if (!nav || !inner || window.location.pathname !== "/") return;
+
+    if (window.scrollY > 20) {
+      nav.style.transform = "translateY(-4px)";
+      inner.style.backgroundColor = "rgba(2, 6, 23, 0.95)";
+      inner.style.boxShadow =
+        "0 10px 40px -10px rgba(0, 0, 0, 0.7), 0 0 20px -5px rgba(14, 165, 233, 0.3)";
+      inner.style.borderColor = "rgba(255, 255, 255, 0.15)";
+    } else {
+      nav.style.transform = "translateY(0px)";
+      inner.style.backgroundColor = "rgba(15, 23, 42, 0.7)";
+      inner.style.boxShadow = "0 4px 20px -5px rgba(0, 0, 0, 0.4)";
+      inner.style.borderColor = "rgba(255, 255, 255, 0.25)";
+    }
+  };
+
+  window.addEventListener("scroll", handleScroll);
+
+  document.addEventListener("astro:page-load", () => {
+    setupLogout();
+    handleScroll();
+  });
+
+  setupLogout();
+</script>

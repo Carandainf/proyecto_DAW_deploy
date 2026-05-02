@@ -1,0 +1,351 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { protectRoute } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+// 1. Protección de ruta (Solo Admins)
+const { shouldRedirect, url, user: adminUser } = await protectRoute(Astro.request, "admin");
+if (shouldRedirect) return Astro.redirect(url);
+
+// 2. Traemos los contactos YA GESTIONADOS (leido: true)
+const contactosArchivados = await prisma.contacto.findMany({
+  where: { leido: true },
+  include: { admin: true },
+  orderBy: { fecha_gestion: "desc" },
+});
+---
+
+<Layout title="Historial de Contactos | Admin" darkMode={true}>
+  <main
+    class="min-h-screen pt-28 md:pt-36 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto transition-all"
+  >
+    <header
+      class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-12 relative"
+    >
+      <div class="relative z-10">
+        <a
+          href="/dashboard/admin"
+          class="inline-flex items-center gap-2 text-slate-500 hover:text-dent-accent transition-colors text-[10px] font-black uppercase tracking-widest mb-4 group cursor-pointer"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            class="group-hover:-translate-x-1 transition-transform"
+            ><path d="m15 18-6-6 6-6"></path></svg
+          >
+          Volver al panel
+        </a>
+        <h1 class="text-4xl md:text-5xl font-black text-white italic uppercase tracking-tighter">
+          Consultas <span class="text-amber-500">Archivadas</span>
+        </h1>
+        <p class="text-slate-500 font-medium mt-2 max-w-md">
+          Registro histórico de mensajes web y atención al cliente.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4 relative z-10 w-full lg:w-auto">
+        <div class="relative flex-1 sm:flex-initial">
+          <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg
+            >
+          </div>
+          <input
+            type="text"
+            id="searchBox"
+            placeholder="BUSCAR POR NOMBRE O ASUNTO..."
+            class="bg-dent-card border border-dent-border rounded-full pl-10 pr-6 py-3 text-[11px] font-black text-white outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all placeholder:text-slate-600 w-full sm:w-[280px] uppercase tracking-widest"
+          />
+        </div>
+
+        <button
+          id="downloadPDF"
+          class="bg-amber-500 hover:bg-amber-400 hover:shadow-amber-500/40 text-black px-8 py-3 rounded-full font-black text-[11px] tracking-widest transition-all shadow-xl shadow-amber-500/10 flex items-center justify-center gap-2 uppercase group w-full sm:w-auto"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            class="group-hover:translate-y-0.5 transition-transform"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Exportar Log
+        </button>
+      </div>
+    </header>
+
+    <div
+      class="bg-dent-card border border-dent-border rounded-[2.5rem] overflow-hidden shadow-2xl relative"
+    >
+      <div class="overflow-x-auto no-scrollbar">
+        <table class="w-full text-left border-collapse" id="contactTable">
+          <thead>
+            <tr class="bg-slate-950 border-b border-dent-border/50">
+              <th
+                class="p-6 text-[12px] font-black text-white uppercase tracking-[0.2em] opacity-90 w-[120px]"
+                >Recibido</th
+              >
+              <th
+                class="p-6 text-[12px] font-black text-white uppercase tracking-[0.2em] opacity-90"
+                >Cliente / Email</th
+              >
+              <th
+                class="p-6 text-[12px] font-black text-white uppercase tracking-[0.2em] opacity-90"
+                >Asunto</th
+              >
+              <th
+                class="p-6 text-[12px] font-black text-white uppercase tracking-[0.2em] opacity-90 w-[180px]"
+                >Gestionado por</th
+              >
+              <th
+                class="p-6 text-[12px] font-black text-white uppercase tracking-[0.2em] text-right opacity-90 w-[100px]"
+                >Acciones</th
+              >
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-dent-border/30">
+            {
+              contactosArchivados.length === 0 ? (
+                <tr>
+                  <td colspan="5" class="p-20 text-center text-slate-500 italic text-sm">
+                    No hay mensajes archivados todavía.
+                  </td>
+                </tr>
+              ) : (
+                contactosArchivados.map((c) => (
+                  <tr
+                    class="contact-row hover:bg-white/[0.02] transition-colors group"
+                    data-search={`${c.nombre} ${c.asunto} ${c.email}`.toLowerCase()}
+                  >
+                    <td class="p-6">
+                      <div class="flex flex-col">
+                        <span class="text-sm font-bold text-slate-400 font-mono">
+                          {new Date(c.fecha_envio).toLocaleDateString("es-ES")}
+                        </span>
+                        <span class="text-[10px] text-slate-600 font-bold uppercase tracking-tighter">
+                          {new Date(c.fecha_envio).toLocaleTimeString("es-ES", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="p-6">
+                      <div class="flex flex-col gap-0.5">
+                        <span class="text-sm font-black text-white uppercase tracking-tight group-hover:text-amber-500 transition-colors leading-none">
+                          {c.nombre}
+                        </span>
+                        <span class="text-[11px] text-slate-500 font-medium lowercase leading-none">
+                          {c.email}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="p-6">
+                      <p class="text-sm text-slate-200 font-bold max-w-[200px] truncate">
+                        {c.asunto}
+                      </p>
+                      <p class="text-[11px] text-slate-500 italic line-clamp-1">"{c.mensaje}"</p>
+                    </td>
+                    <td class="p-6">
+                      {c.admin ? (
+                        <div class="flex items-center gap-2 admin-cell-content">
+                          <div class="w-6 h-6 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[9px] text-slate-400 admin-icon">
+                            {c.admin.name?.charAt(0)}
+                          </div>
+                          <span class="text-[11px] font-bold text-slate-400 uppercase admin-name">
+                            {c.admin.name.split(" ")[0]}
+                          </span>
+                        </div>
+                      ) : (
+                        <span class="text-[10px] text-slate-600 italic">Auto-archivado</span>
+                      )}
+                    </td>
+                    <td class="p-6">
+                      <div class="flex justify-end items-center gap-2">
+                        <button
+                          class="p-2.5 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all view-message"
+                          data-nombre={c.nombre}
+                          data-mensaje={c.mensaje}
+                          data-fecha={new Date(c.fecha_envio).toLocaleDateString("es-ES")}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                          >
+                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <div
+    id="viewModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm"
+  >
+    <div class="bg-dent-card border border-dent-border w-full max-w-lg rounded-3xl p-8 shadow-2xl">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <p
+            id="modalDate"
+            class="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1"
+          >
+          </p>
+          <h3
+            id="modalName"
+            class="text-2xl font-black text-white italic uppercase tracking-tighter"
+          >
+          </h3>
+        </div>
+        <button id="closeModal" class="text-slate-500 hover:text-white transition-colors">✕</button>
+      </div>
+      <div class="bg-slate-900/50 border border-white/5 p-6 rounded-2xl">
+        <p class="text-[10px] uppercase text-slate-500 font-black mb-3 tracking-widest">
+          Contenido del mensaje:
+        </p>
+        <p id="modalContent" class="text-slate-300 italic leading-relaxed"></p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+></script>
+<script
+  is:inline
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"
+></script>
+
+<script>
+  /**
+   * @description Filtra dinámicamente las filas de la tabla según el input de búsqueda.
+   * @author Gemini
+   * @version 1.1
+   */
+  const searchBox = document.getElementById("searchBox");
+  const rows = document.querySelectorAll(".contact-row");
+
+  searchBox?.addEventListener("input", (e) => {
+    const term = (e.target as HTMLInputElement).value.toLowerCase();
+    rows.forEach((row) => {
+      const content = row.getAttribute("data-search") || "";
+      (row as HTMLElement).style.display = content.includes(term) ? "" : "none";
+    });
+  });
+
+  /**
+   * @description Gestiona la apertura y cierre del modal de visualización de mensajes.
+   */
+  const modal = document.getElementById("viewModal");
+  const modalName = document.getElementById("modalName");
+  const modalDate = document.getElementById("modalDate");
+  const modalContent = document.getElementById("modalContent");
+
+  document.querySelectorAll(".view-message").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      modalName!.textContent = btn.getAttribute("data-nombre");
+      modalDate!.textContent = btn.getAttribute("data-fecha");
+      modalContent!.textContent = btn.getAttribute("data-mensaje");
+      modal?.classList.replace("hidden", "flex");
+    });
+  });
+
+  document.getElementById("closeModal")?.addEventListener("click", () => {
+    modal?.classList.replace("flex", "hidden");
+  });
+
+  /**
+   * @description Genera un archivo PDF con los registros visibles de la tabla.
+   * Aplica estilos personalizados para las celdas multi-línea y el esquema de colores corporativo.
+   */
+  document.getElementById("downloadPDF")?.addEventListener("click", () => {
+    const { jsPDF } = (window as any).jspdf;
+    const doc = new jsPDF();
+
+    // Fondo del encabezado PDF
+    doc.setFillColor(2, 6, 23);
+    doc.rect(0, 0, 210, 40, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(245, 158, 11);
+    doc.text("LOG DE CONTACTOS ARCHIVADOS", 15, 25);
+
+    const visibleRows = Array.from(rows).filter((r: any) => r.style.display !== "none");
+
+    const data = visibleRows.map((r: any) => {
+      const cells = r.querySelectorAll("td");
+
+      // Limpieza de la celda "Gestionado por" para evitar iconos en el texto
+      const managedCell = cells[3].cloneNode(true) as HTMLElement;
+      const iconDiv = managedCell.querySelector(".w-5.h-5, .w-6.h-6");
+      if (iconDiv) iconDiv.remove();
+
+      return [
+        cells[0].innerText.trim(),
+        cells[1].innerText.trim(), // Nombre y Email en dos líneas
+        cells[2].innerText.split("\n")[0].trim(),
+        managedCell.innerText.trim(),
+      ];
+    });
+
+    (doc as any).autoTable({
+      startY: 50,
+      head: [["FECHA", "CLIENTE / EMAIL", "ASUNTO", "GESTIONADO POR"]],
+      body: data,
+      theme: "grid",
+      styles: { fontSize: 8, cellPadding: 4 },
+      headStyles: { fillColor: [245, 158, 11], textColor: [0, 0, 0], fontStyle: "bold" },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 65 }, // Le damos el ancho mayor a Cliente/Email
+        2: { cellWidth: 60 },
+        3: { cellWidth: 35 },
+      },
+    });
+
+    doc.save(`Contactos_Archivados_${Date.now()}.pdf`);
+  });
+</script>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

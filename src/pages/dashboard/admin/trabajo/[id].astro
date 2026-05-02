@@ -1,0 +1,348 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { prisma } from "@/lib/prisma";
+import { protectRoute } from "@/lib/auth";
+
+const { id } = Astro.params;
+const { shouldRedirect, url, user } = await protectRoute(Astro.request, "admin");
+if (shouldRedirect) return Astro.redirect(url);
+
+const trabajo = await prisma.archivo.findUnique({
+  where: { id_archivo: Number(id) },
+  include: {
+    usuario: true,
+    mensajes: {
+      orderBy: { fecha_envio: "asc" },
+      include: { emisor: true },
+    },
+  },
+});
+
+if (!trabajo) return Astro.redirect("/404");
+---
+
+<Layout title={`Trabajo: ${trabajo.nombre_archivo}`} darkMode={true}>
+  <main class="max-w-6xl mx-auto px-4 md:px-8 pb-12 pt-28 md:pt-36 transition-all">
+    <div class="mb-8">
+      <button
+        onclick="history.back()"
+        class="inline-flex items-center gap-2 text-slate-500 hover:text-dent-accent transition-colors text-[10px] font-black uppercase tracking-widest group cursor-pointer"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          class="group-hover:-translate-x-1 transition-transform"
+          ><path d="m15 18-6-6 6-6"></path></svg
+        >
+        Volver al historial
+      </button>
+    </div>
+
+    <div class="flex flex-col lg:flex-row justify-between items-start gap-8 mb-10">
+      <div>
+        <h1
+          class="text-4xl md:text-5xl font-black text-white italic uppercase tracking-tighter leading-none"
+        >
+          {trabajo.nombre_archivo}
+        </h1>
+        <p class="text-slate-500 font-medium mt-3 uppercase text-xs tracking-widest">
+          Doctor/a: <span class="text-dent-accent font-black">{trabajo.usuario.name}</span>
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+        <button
+          id="exportarChatPDF"
+          class="flex-1 lg:flex-none bg-slate-900 hover:bg-slate-800 text-slate-300 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border border-white/5 flex items-center justify-center gap-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            ><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline
+              points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg
+          >
+          Exportar Chat
+        </button>
+
+        <a
+          href={`/api/downloads/${trabajo.id_archivo}`}
+          class="flex-1 lg:flex-none bg-slate-900 hover:bg-slate-800 text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border border-white/10 flex items-center justify-center gap-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            ><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline
+              points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg
+          >
+          Archivo STL
+        </a>
+
+        <select
+          id="cambiar-estado"
+          data-id={trabajo.id_archivo}
+          class="w-full lg:w-auto bg-dent-accent hover:bg-cyan-400 text-dent-dark font-black px-8 py-3.5 rounded-2xl outline-none cursor-pointer uppercase text-[10px] tracking-widest transition-all shadow-lg shadow-cyan-500/10"
+        >
+          <option value="pendiente" selected={trabajo.estado === "pendiente"}
+            >ESTADO: PENDIENTE</option
+          >
+          <option value="en_proceso" selected={trabajo.estado === "en_proceso"}
+            >ESTADO: EN PROCESO</option
+          >
+          <option value="completado" selected={trabajo.estado === "completado"}
+            >ESTADO: COMPLETADO</option
+          >
+        </select>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="space-y-6">
+        <div
+          class="bg-dent-card border border-dent-border p-8 rounded-[2rem] shadow-xl relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 right-0 w-24 h-24 bg-dent-accent/5 rounded-full blur-2xl -mr-10 -mt-10"
+          >
+          </div>
+          <h2
+            class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-2"
+          >
+            <span class="w-2 h-2 bg-dent-accent rounded-full animate-pulse"></span>
+            Detalles Técnicos
+          </h2>
+          <div class="space-y-5">
+            <div class="flex justify-between items-center border-b border-white/5 pb-4">
+              <span class="text-slate-400 text-[10px] font-black uppercase tracking-wider"
+                >Prioridad</span
+              >
+              <span
+                class={`text-[10px] font-black px-3 py-1 rounded-full border ${trabajo.prioridad === "urgente" ? "text-red-500 border-red-500/20 bg-red-500/10" : "text-dent-accent border-dent-accent/20 bg-dent-accent/10"}`}
+              >
+                {trabajo.prioridad.toUpperCase()}
+              </span>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+              <span class="text-slate-400 text-[10px] font-black uppercase tracking-wider"
+                >Recibido</span
+              >
+              <span class="text-slate-200 text-xs font-mono font-bold">
+                {
+                  trabajo.fecha_subida
+                    ? new Date(trabajo.fecha_subida).toLocaleDateString("es-ES")
+                    : "---"
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="lg:col-span-2 flex flex-col h-[600px] bg-dent-card border border-dent-border rounded-[2.5rem] overflow-hidden shadow-2xl"
+      >
+        <div class="p-6 border-b border-dent-border bg-slate-950 flex justify-between items-center">
+          <h2 class="font-black text-[10px] uppercase tracking-[0.2em] text-slate-200">
+            Historial de Comunicación
+          </h2>
+          <span
+            class="text-[9px] bg-dent-accent/10 text-dent-accent px-3 py-1 rounded-full font-black tracking-tighter"
+            >SERVER: ACTIVE</span
+          >
+        </div>
+
+        <div
+          id="chat-box"
+          class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-dent-dark/30"
+        >
+          {
+            trabajo.mensajes.map((m) => (
+              <div
+                class={`flex ${user && m.id_emisor === user.id ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  class={`max-w-[85%] p-5 rounded-2xl shadow-lg ${
+                    user && m.id_emisor === user.id
+                      ? "bg-dent-accent text-dent-dark font-bold rounded-tr-none"
+                      : "bg-slate-800 text-slate-100 rounded-tl-none border border-white/5"
+                  }`}
+                >
+                  <p class="text-sm leading-relaxed">{m.contenido}</p>
+                  <span
+                    class={`text-[9px] mt-3 block text-right font-black opacity-50 uppercase tracking-tighter`}
+                  >
+                    {m.fecha_envio
+                      ? new Date(m.fecha_envio).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : ""}
+                  </span>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        <form id="form-mensaje" class="p-6 bg-slate-950 border-t border-dent-border flex gap-4">
+          <input type="hidden" name="id_archivo" value={trabajo.id_archivo} />
+          <textarea
+            name="contenido"
+            required
+            placeholder="ESCRIBE UN MENSAJE AL DOCTOR..."
+            class="dent-input flex-1 resize-none h-12"
+            rows="1"></textarea>
+          <button
+            class="bg-dent-accent text-dent-dark p-5 rounded-2xl hover:bg-cyan-400 transition-all shadow-xl shadow-cyan-500/10 active:scale-95 flex items-center justify-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+            >
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+></script>
+<script
+  is:inline
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"
+></script>
+
+<script define:vars={{ trabajo }}>
+  const selectEstado = document.getElementById("cambiar-estado");
+  const formMensaje = document.getElementById("form-mensaje");
+  const chatBox = document.getElementById("chat-box");
+  const btnPDF = document.getElementById("exportarChatPDF");
+
+  // Scroll al fondo automático
+  const scrollChat = () => {
+    if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+  };
+  window.addEventListener("load", () => {
+    scrollChat();
+    // poner el foco otra vez en el textarea para seguir escribiendo
+    formMensaje.querySelector("textarea")?.focus();
+  });
+
+  // --- Lógica de Estado ---
+  selectEstado?.addEventListener("change", async (e) => {
+    const nuevoEstado = e.target.value;
+    const id = selectEstado.getAttribute("data-id");
+    await fetch("/api/admin/cambiar-estado", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: Number(id), estado: nuevoEstado }),
+    });
+  });
+
+  // --- Lógica de Mensajes ---
+  formMensaje?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // 1. EXTRAEMOS LOS DATOS
+    const formData = new FormData(formMensaje);
+    const payload = Object.fromEntries(formData);
+
+    // 2. FEEDBACK VISUAL
+    const btn = formMensaje.querySelector("button");
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = "0.5"; // Un toque visual extra para que se note que está bloqueado
+    }
+
+    try {
+      // 3. ENVIAMOS EL PAYLOAD AL SERVIDOR
+      const res = await fetch("/api/admin/enviar-mensaje", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        formMensaje.reset();
+        location.reload();
+      } else {
+        alert("Error al enviar el mensaje");
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = "1";
+        }
+      }
+    } catch (error) {
+      alert("Error de conexión");
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+      }
+    }
+  });
+
+  // --- Lógica de Exportación PDF ---
+  btnPDF?.addEventListener("click", () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Configuración de estilo de cabecera
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(6, 182, 212); // Color dent-accent
+    doc.text("REPORTE DE COMUNICACIÓN TÉCNICA", 14, 22);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Trabajo: ${trabajo.nombre_archivo}`, 14, 32);
+    doc.text(`Doctor/Cliente: ${trabajo.usuario.name}`, 14, 37);
+    doc.text(`Fecha del reporte: ${new Date().toLocaleDateString()}`, 14, 42);
+    doc.line(14, 45, 196, 45);
+
+    // Mapeo de mensajes directamente del DOM para capturar lo que ve el admin
+    const mensajesDOM = Array.from(document.querySelectorAll("#chat-box > div"));
+    const tableData = mensajesDOM.map((div) => {
+      const emisor = div.classList.contains("justify-end") ? "ADMIN" : "DOCTOR";
+      const texto = div.querySelector("p")?.innerText || "";
+      const hora = div.querySelector("span")?.innerText || "";
+      return [emisor, texto, hora];
+    });
+
+    // Generación de la tabla
+    doc.autoTable({
+      startY: 50,
+      head: [["Emisor", "Contenido del Mensaje", "Fecha/Hora"]],
+      body: tableData,
+      theme: "grid",
+      headStyles: { fillColor: [2, 6, 23], textColor: [255, 255, 255] },
+      columnStyles: {
+        0: { cellWidth: 25, fontStyle: "bold" },
+        2: { cellWidth: 35 },
+      },
+    });
+
+    doc.save(`Chat_Lab_${trabajo.nombre_archivo.replace(/\s+/g, "_")}.pdf`);
+  });
+</script>

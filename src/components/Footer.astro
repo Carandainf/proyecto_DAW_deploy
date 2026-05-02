@@ -1,0 +1,140 @@
+---
+/**
+ * @file Footer.astro
+ * @description Pie de página corporativo con grid adaptativo e iconos SVG optimizados.
+ * Incluye secciones de servicios, contacto directo, redes sociales y enlaces legales.
+ */
+const currentYear = new Date().getFullYear();
+
+// Definimos las redes sociales con sus respectivos SVGs (Lucide-style)
+const socialLinks = [
+  {
+    name: "Instagram",
+    href: "#",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>`,
+  },
+  {
+    name: "Facebook",
+    href: "#",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>`,
+  },
+  {
+    name: "LinkedIn",
+    href: "#",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>`,
+  },
+];
+---
+
+<footer class="pb-12 px-4 md:px-8 bg-dent-bg transition-all">
+  <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+    <!-- Columna Logo y Servicios -->
+    <div
+      class="md:col-span-2 bg-dent-card border border-dent-border rounded-[2rem] p-8 md:p-10 flex flex-col justify-between shadow-sm"
+    >
+      <div>
+        <div class="flex items-center gap-3 mb-6">
+          <div
+            class="w-10 h-10 bg-dent-accent rounded-xl flex items-center justify-center font-black text-dent-dark shadow-lg shadow-dent-accent/20"
+          >
+            L
+          </div>
+          <span class="text-2xl font-black text-dent-dark tracking-tighter uppercase italic"
+            >Laboratorio <span class="text-dent-accent">Dental</span></span
+          >
+        </div>
+        <p class="text-slate-500 text-xs leading-relaxed max-w-md italic font-medium">
+          Líderes en prótesis fija, removible y flujos digitales.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 pt-8 border-t border-slate-200">
+        <ul class="text-[10px] text-slate-400 space-y-2 uppercase font-black tracking-widest">
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-dent-accent"></span>Prótesis sobre implantes
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-dent-accent"></span>Coronas Zirconio
+          </li>
+        </ul>
+        <ul class="text-[10px] text-slate-400 space-y-2 uppercase font-black tracking-widest">
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-dent-accent"></span>Ortodoncia Invisible
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-dent-accent"></span>Estética Avanzada
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Columna Contacto con Iconos -->
+    <div
+      class="bg-dent-card border border-dent-border rounded-[2rem] p-8 shadow-sm flex flex-col justify-center"
+    >
+      <h4 class="text-[10px] font-black text-dent-dark uppercase tracking-[0.3em] mb-6 opacity-50">
+        Contacto
+      </h4>
+      <div class="space-y-6">
+        <div>
+          <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1">
+            Email Directo
+          </p>
+          <p class="text-xs text-dent-dark font-bold italic break-all leading-tight">
+            contacto@tulaboratorio.com
+          </p>
+        </div>
+        <div class="w-full h-px bg-slate-300"></div>
+        <div>
+          <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1">
+            Horario Entrega
+          </p>
+          <p class="text-xs text-dent-dark font-bold italic leading-tight uppercase">
+            L - V: 09:00 - 19:00
+          </p>
+        </div>
+
+        <!-- SECCIÓN DE REDES SOCIALES ACTUALIZADA con SVG -->
+        <div class="flex gap-3 pt-2">
+          {
+            socialLinks.map((social) => (
+              <a
+                href={social.href}
+                aria-label={social.name}
+                class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-400 hover:bg-dent-accent hover:text-dent-dark hover:border-dent-accent transition-all active:scale-90 group"
+                set:html={social.svg}
+              />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna Legal  -->
+    <div
+      class="bg-slate-900 text-white rounded-[2rem] p-8 flex flex-col justify-between border border-white/5 shadow-xl"
+    >
+      <div class="space-y-4">
+        <h4 class="text-[10px] font-black text-dent-accent uppercase tracking-[0.3em]">Legal</h4>
+        <nav class="flex flex-col gap-3">
+          {
+            ["Privacidad", "Aviso Legal", "Cookies"].map((item) => (
+              <a
+                href={`/${item.toLowerCase().replace(" ", "-")}`}
+                class="text-[10px] text-slate-400 hover:text-white transition-colors uppercase tracking-[0.2em] font-black"
+              >
+                {item}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+      <div class="mt-10 pt-6 border-t border-white/70">
+        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
+          © {currentYear} Laboratorio Dental.<br />
+          <span class="text-dent-accent/40 italic">Créditos: Carlos - Proyecto DAW</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>

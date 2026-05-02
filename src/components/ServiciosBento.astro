@@ -1,0 +1,251 @@
+---
+/**
+ * @file ServiciosBento.astro
+ * @description Catálogo Bento Grid con modal de servicios.
+ *
+ * CAMBIOS REALIZADOS:
+ * - Eliminada la lógica de cierre por clic externo para evitar conflictos. No funcionaba correctamente.
+ * - Mantenido el sistema de cierre dual: Botón "X" y Botón "Volver".
+ * - Layout responsivo para acciones del modal.
+ */
+
+import type { Servicio } from "../types/dentallab";
+
+const servicios: Servicio[] = [
+  {
+    id: "fija",
+    title: "Prótesis Fija",
+    desc: "Zirconio y Disilicato e.max con acabado artesanal.",
+    longDesc:
+      "Nuestras restauraciones de prótesis fija representan la cumbre de la estética dental. Utilizamos sistemas CAD/CAM de fresado en seco para circonio de alta traslucidez y prensado para disilicato de litio. Cada pieza es terminada manualmente asegurando una mimetización natural.",
+    img: "/servicios/corona dental de circonio en estudio minimalista.webp",
+    features: ["Ajuste marginal < 20µm", "Circonio multicapa", "Estética personalizada"],
+    size: "md:col-span-2 md:row-span-2",
+  },
+  {
+    id: "implantes",
+    title: "Implantes",
+    desc: "Estructuras de titanio fresado de alta pasividad.",
+    longDesc:
+      "La rehabilitación sobre implantes requiere una precisión absoluta. Fabricamos desde coronas unitarias hasta grandes estructuras híbridas garantizando la 'pasividad total' de las estructuras.",
+    img: "/servicios/modelo de puente dental con implantes.webp",
+    features: ["Alta fidelidad", "Titanio Grado 5 médico", "Multi-compatibilidad"],
+    size: "md:col-span-2",
+  },
+  {
+    id: "estetica",
+    title: "Estética Avanzada",
+    desc: "Carillas ultrafinas y diseño de sonrisa digital.",
+    longDesc:
+      "Transformamos sonrisas mediante el Diseño Digital de Sonrisa (DSD). Ofrecemos carillas de porcelana de espesor mínimo que permiten rehabilitaciones mínimamente invasivas.",
+    img: "/servicios/modelo dental veneers y sonrisa natural.webp",
+    features: ["Diseño 3D (Mock-up)", "Mínima invasión", "Alta resistencia"],
+    size: "md:col-span-1",
+  },
+  {
+    id: "digital",
+    title: "Flujo Digital 3D",
+    desc: "Férulas de descarga y guías quirúrgicas impresas.",
+    longDesc:
+      "Digitalizamos el laboratorio para acelerar sus tiempos clínicos mediante impresión 3D de alta resolución (SLA/DLP) a partir de sus archivos STL.",
+    img: "/servicios/impresión 3D de alineador dental.webp",
+    features: ["Resinas biocompatibles", "Precisión de 50µm", "Entrega urgente"],
+    size: "md:col-span-1",
+  },
+];
+---
+
+<section id="servicios" class="scroll-mt-24 mt-20">
+  <header class="max-w-3xl mb-12">
+    <div class="flex gap-3 items-center mb-4">
+      <div class="w-1.5 h-6 bg-dent-accent rounded-full"></div>
+      <h2
+        class="text-3xl md:text-5xl font-black text-dent-dark italic tracking-tighter leading-none uppercase"
+      >
+        Vanguardia en <br /><span class="text-dent-accent">Tecnología</span>
+      </h2>
+    </div>
+  </header>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[250px]">
+    {
+      servicios.map((s) => (
+        <button
+          class={`group relative overflow-hidden rounded-[2.5rem] border border-dent-border bg-dent-card shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer text-left outline-none ${s.size}`}
+          data-service={JSON.stringify(s)}
+        >
+          <div class="absolute inset-0 z-0">
+            <img
+              src={s.img}
+              alt={s.title}
+              class="h-full w-full object-cover opacity-80 group-hover:scale-105 transition-all duration-700"
+            />
+            <div class="absolute inset-0 bg-linear-to-t from-dent-dark/95 via-dent-dark/20 to-transparent opacity-90" />
+          </div>
+
+          <div class="absolute inset-0 p-8 flex flex-col justify-end z-10">
+            <div class="relative">
+              <div class="absolute -left-4 top-0 bottom-0 w-1 bg-dent-accent scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-bottom shadow-[0_0_10px_rgba(14,165,233,0.5)]" />
+              <h3 class="text-xl md:text-2xl font-black text-white italic uppercase drop-shadow-lg leading-none mb-1">
+                {s.title}
+              </h3>
+            </div>
+            <p class="text-slate-200 text-xs font-bold italic opacity-90">{s.desc}</p>
+          </div>
+        </button>
+      ))
+    }
+  </div>
+
+  <dialog
+    id="service-modal"
+    class="backdrop:bg-dent-dark/80 backdrop:backdrop-blur-xl bg-transparent p-4 w-full h-full max-w-none max-h-none border-none outline-none overflow-hidden"
+  >
+    <div class="flex items-center justify-center min-h-full">
+      <div
+        class="glass-card w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-2xl relative border border-white/10 flex flex-col md:flex-row"
+      >
+        <div class="w-full md:w-1/2 h-64 md:h-auto relative">
+          <img id="modal-img" src="" alt="" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-linear-to-t from-dent-dark to-transparent opacity-60">
+          </div>
+          <h2
+            id="modal-title"
+            class="absolute bottom-8 left-8 text-4xl md:text-5xl font-black text-white italic uppercase"
+          >
+          </h2>
+        </div>
+
+        <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
+          <!-- Botón Cerrar (X) -->
+          <button
+            id="close-modal"
+            class="absolute top-8 right-8 text-white/50 hover:text-dent-accent transition-colors cursor-pointer"
+            aria-label="Cerrar modal"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+
+          <p
+            id="modal-long-desc"
+            class="text-slate-300 text-base md:text-lg font-medium italic leading-relaxed mb-8"
+          >
+          </p>
+
+          <ul id="modal-features" class="space-y-3 mb-10"></ul>
+
+          <div class="flex flex-col sm:flex-row gap-4">
+            <button id="modal-cta" class="btn-primary w-full sm:w-auto">
+              Solicitar Información Técnica
+            </button>
+
+            <!-- Botón Volver / Salir -->
+            <button
+              id="modal-back"
+              class="px-8 py-4 rounded-2xl border border-white/10 text-white/50 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/5 hover:text-white transition-all active:scale-95 w-full sm:w-auto"
+            >
+              Volver al catálogo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  import type { Servicio } from "../types/dentallab";
+
+  const modal = document.getElementById("service-modal") as HTMLDialogElement;
+  const closeBtn = document.getElementById("close-modal");
+  const backBtn = document.getElementById("modal-back");
+  const ctaBtn = document.getElementById("modal-cta");
+
+  const modalImg = document.getElementById("modal-img") as HTMLImageElement;
+  const modalTitle = document.getElementById("modal-title") as HTMLElement;
+  const modalDesc = document.getElementById("modal-long-desc") as HTMLElement;
+  const modalFeatures = document.getElementById("modal-features") as HTMLElement;
+
+  // Rellenar y abrir modal
+  document.querySelectorAll("[data-service]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const dataRaw = button.getAttribute("data-service");
+      if (!dataRaw) return;
+
+      const data: Servicio = JSON.parse(dataRaw);
+
+      if (modalTitle) modalTitle.textContent = data.title;
+      if (modalDesc) modalDesc.textContent = data.longDesc;
+      if (modalImg) {
+        modalImg.src = data.img;
+        modalImg.alt = data.title;
+      }
+
+      if (modalFeatures) {
+        modalFeatures.innerHTML = data.features
+          .map(
+            (f) => `
+            <li class="flex items-center gap-3 text-slate-400 text-sm font-bold italic">
+              <div class="w-1.5 h-1.5 rounded-full bg-dent-accent"></div>
+              ${f}
+            </li>
+          `
+          )
+          .join("");
+      }
+
+      modal?.showModal();
+    });
+  });
+
+  // Lógica de cierre unificada para X y botón Volver
+  [closeBtn, backBtn].forEach((btn) => {
+    btn?.addEventListener("click", () => modal?.close());
+  });
+
+  // Lógica del botón CTA (Scroll a contacto)
+  ctaBtn?.addEventListener("click", () => {
+    modal?.close();
+
+    const target = document.getElementById("contacto");
+    if (target) {
+      setTimeout(() => {
+        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - 100;
+        const startPosition = window.pageYOffset;
+        const distance = targetPosition - startPosition;
+        let startTime: number | null = null;
+        const duration = 500;
+
+        function animation(currentTime: number) {
+          if (startTime === null) startTime = currentTime;
+          const timeElapsed = currentTime - startTime;
+          const run = ease(timeElapsed, startPosition, distance, duration);
+          window.scrollTo(0, run);
+          if (timeElapsed < duration) requestAnimationFrame(animation);
+        }
+
+        function ease(t: number, b: number, c: number, d: number) {
+          t /= d / 2;
+          if (t < 1) return (c / 2) * t * t + b;
+          t--;
+          return (-c / 2) * (t * (t - 2) - 1) + b;
+        }
+
+        requestAnimationFrame(animation);
+      }, 150);
+    }
+  });
+</script>

@@ -1,0 +1,36 @@
+<section id="faq" class="scroll-mt-32 w-full max-w-4xl mx-auto">
+  <div class="bg-dent-card border border-dent-border rounded-[3rem] p-8 md:p-12 shadow-2xl">
+    <h2 class="text-2xl font-black text-dent-dark italic uppercase mb-8 text-center">
+      Preguntas <span class="text-dent-accent">Frecuentes</span>
+    </h2>
+
+    <div class="space-y-4">
+      {
+        [
+          {
+            q: "¿Qué formatos de archivo aceptáis?",
+            a: "Aceptamos principalmente archivos STL, PLY y OBJ de cualquier escáner intraoral del mercado.",
+          },
+          {
+            q: "¿Cuál es el tiempo de entrega para una corona?",
+            a: "El tiempo estándar es de 3 a 5 días laborables desde la recepción del diseño digital.",
+          },
+          {
+            q: "¿Cómo se gestionan las repeticiones?",
+            a: "Todas nuestras prótesis tienen garantía total. Las repeticiones se gestionan con prioridad máxima a través del Dashboard.",
+          },
+        ].map((item) => (
+          <details class="group border-b border-slate-100 pb-4">
+            <summary class="list-none cursor-pointer flex justify-between items-center text-sm font-bold uppercase tracking-wide text-dent-dark hover:text-dent-accent transition-colors">
+              {item.q}
+              <span class="text-xl group-open:rotate-45 transition-transform">+</span>
+            </summary>
+            <p class="mt-4 text-slate-500 text-sm leading-relaxed pl-2 border-l-2 border-dent-accent">
+              {item.a}
+            </p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,249 @@
+---
+/**
+ * DETALLE DE TRABAJO & CHAT TÉCNICO
+ */
+import Layout from "@/layouts/Layout.astro";
+import { prisma } from "@/lib/prisma";
+import { getUserRole } from "@/lib/auth";
+
+const { id } = Astro.params;
+const { user, loggedIn } = await getUserRole(Astro.request);
+
+if (!loggedIn || !user) return Astro.redirect("/");
+
+const trabajo = await prisma.archivo.findUnique({
+  where: { id_archivo: Number(id) },
+  include: {
+    mensajes: {
+      include: { emisor: true },
+      orderBy: { fecha_envio: "asc" },
+    },
+  },
+});
+
+if (!trabajo || (trabajo.id_usuario !== user.id && user.role !== "admin")) {
+  return Astro.redirect("/dashboard/cliente");
+}
+---
+
+<Layout title={`Expediente: ${trabajo.nombre_archivo}`} darkMode={true}>
+  <main
+    class="min-h-screen pt-28 md:pt-36 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto transition-all"
+  >
+    <div class="mb-8">
+      <button
+        onclick="history.back()"
+        class="inline-flex items-center gap-3 text-slate-500 hover:text-dent-accent transition-all text-[10px] font-black uppercase tracking-[0.2em] group cursor-pointer"
+      >
+        <div
+          class="w-8 h-8 rounded-full border border-slate-800 flex items-center justify-center group-hover:border-dent-accent/50 group-hover:bg-dent-accent/10 transition-all"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="group-hover:-translate-x-0.5 transition-transform"
+            ><path d="m15 18-6-6 6-6"></path></svg
+          >
+        </div>
+        Volver al Panel
+      </button>
+    </div>
+
+    <section
+      class="bg-dent-card rounded-[2rem] border border-dent-border p-8 mb-8 relative overflow-hidden shadow-2xl"
+    >
+      <div
+        class="absolute -top-20 -right-20 w-64 h-64 bg-dent-accent/5 rounded-full blur-[80px] pointer-events-none"
+      >
+      </div>
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10"
+      >
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <span
+              class="text-[9px] font-black text-slate-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded"
+              >ID: #LAB-{trabajo.id_archivo}</span
+            >
+            <span
+              class="text-[9px] font-black text-dent-accent uppercase tracking-widest bg-dent-accent/10 px-2 py-0.5 rounded italic"
+              >Prioridad: {trabajo.prioridad || "Normal"}</span
+            >
+          </div>
+          <h1
+            class="text-3xl md:text-4xl font-black text-white italic uppercase tracking-tighter leading-none"
+          >
+            {trabajo.nombre_archivo}
+          </h1>
+          <p class="text-slate-500 text-xs font-medium mt-2 flex items-center gap-2 italic">
+            Recibido el {
+              new Date(trabajo.fecha_subida).toLocaleDateString("es-ES", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })
+            }
+          </p>
+        </div>
+        <div class="flex items-center gap-4">
+          <a
+            href={`/api/downloads/${trabajo.id_archivo}`}
+            class="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-black text-white uppercase tracking-widest transition-all"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              ><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline
+                points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"
+              ></line></svg
+            >
+            Descargar STL
+          </a>
+          <div
+            class={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border shadow-lg ${trabajo.estado === "pendiente" ? "bg-amber-500/10 text-amber-500 border-amber-500/20 shadow-amber-500/5" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-emerald-500/5"}`}
+          >
+            {trabajo.estado}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="bg-dent-card rounded-[2rem] border border-dent-border flex flex-col h-[600px] overflow-hidden shadow-2xl relative"
+    >
+      <div
+        class="px-8 py-5 border-b border-dent-border bg-dent-dark/30 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div class="w-2 h-2 rounded-full bg-dent-accent animate-pulse"></div>
+          <h2 class="text-[10px] font-black text-white uppercase tracking-[0.2em]">
+            Consultas de Diseño
+          </h2>
+        </div>
+        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest"
+          >Protocolo de comunicación Directa</span
+        >
+      </div>
+
+      <div
+        id="chat-box"
+        class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-gradient-to-b from-transparent to-dent-dark/10"
+      >
+        {
+          trabajo.mensajes.length === 0 ? (
+            <div class="h-full flex flex-col items-center justify-center py-12">
+              <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 border border-white/10">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  class="text-dent-accent opacity-50"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <p class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">
+                Sin mensajes técnicos
+              </p>
+            </div>
+          ) : (
+            trabajo.mensajes.map((msg) => (
+              <div
+                class={`flex flex-col ${msg.id_emisor === user.id ? "items-end" : "items-start"}`}
+              >
+                <div class="flex flex-col max-w-[85%] md:max-w-[70%]">
+                  <span
+                    class={`text-[8px] font-black uppercase tracking-widest mb-1.5 px-1 ${msg.id_emisor === user.id ? "text-right text-slate-500" : "text-left text-dent-accent flex items-center gap-1.5"}`}
+                  >
+                    {msg.id_emisor !== user.id && (
+                      <span class="w-1 h-1 rounded-full bg-dent-accent" />
+                    )}
+                    {msg.emisor.name} {msg.id_emisor !== user.id ? "• Lab Tech" : ""}
+                  </span>
+                  <div
+                    class={`p-4 rounded-2xl text-sm leading-relaxed shadow-xl transition-all ${msg.id_emisor === user.id ? "bg-dent-accent text-dent-dark font-bold rounded-tr-none shadow-dent-accent/5" : "bg-slate-800/80 border border-white/10 text-white font-medium rounded-tl-none backdrop-blur-sm shadow-black/20"}`}
+                  >
+                    {msg.contenido}
+                  </div>
+                  <span
+                    class={`text-[8px] font-bold text-slate-600 mt-2 ${msg.id_emisor === user.id ? "text-right" : "text-left"}`}
+                  >
+                    {new Date(msg.fecha_envio).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    — {new Date(msg.fecha_envio).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            ))
+          )
+        }
+      </div>
+
+      <form
+        action="/api/mensajes/enviar"
+        method="POST"
+        class="p-6 bg-dent-dark/50 border-t border-dent-border"
+      >
+        <input type="hidden" name="id_archivo" value={trabajo.id_archivo} />
+        <div class="flex flex-col md:flex-row gap-4">
+          <textarea
+            name="contenido"
+            rows="2"
+            required
+            placeholder="Escriba instrucciones adicionales o dudas..."
+            class="flex-1 px-6 py-4 bg-dent-card border border-dent-border rounded-2xl text-sm text-slate-200 focus:ring-2 focus:ring-dent-accent/30 focus:border-dent-accent outline-none resize-none transition-all placeholder:text-slate-600 font-medium"
+          ></textarea>
+          <button
+            type="submit"
+            class="bg-dent-accent hover:bg-white text-dent-dark px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-cyan-500/10 active:scale-95 flex items-center justify-center gap-2"
+          >
+            Enviar
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              ><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg
+            >
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  const scrollToBottom = () => {
+    const chatContainer = document.getElementById("chat-box");
+    if (chatContainer) {
+      chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  window.addEventListener("load", scrollToBottom);
+  setTimeout(scrollToBottom, 300);
+</script>

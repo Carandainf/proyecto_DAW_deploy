@@ -1,0 +1,143 @@
+---
+/**
+ * @file index.astro
+ * @description Punto de entrada principal de la Landing Page pública de DentalLab.
+ * Estructura jerárquica:
+ * 1. Hero & Login (Conversión inmediata)
+ * 2. Servicios (Catálogo visual)
+ * 3. Equipo (Factor humano)
+ * 4. Contacto & Ubicación (Cierre)
+ * * @author Carlos - Proyecto DAW
+ * @version 0.9.0
+ */
+import Layout from "../layouts/Layout.astro";
+import LoginForm from "../components/LoginForm.astro";
+import ContactForm from "../components/ContactForm.astro";
+import TeamBento from "../components/TeamBento.astro";
+import ServiciosBento from "../components/ServiciosBento.astro";
+import TechStack from "../components/TechStack.astro";
+import Faq from "../components/Faq.astro";
+import Hero from "../components/Hero.astro";
+import { protectRoute } from "@/lib/auth";
+
+const auth = await protectRoute(Astro.request);
+if (auth.user) {
+  return Astro.redirect(auth.user.role === "admin" ? "/dashboard/admin" : "/dashboard/cliente");
+}
+---
+
+<Layout title="DentalLab - Laboratorio de Prótesis Dental Digital" darkMode={false}>
+  <main class="min-h-screen bg-dent-bg transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 space-y-16 md:space-y-32">
+      <section class="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 w-full">
+        <Hero />
+
+        <div
+          id="login-section"
+          class="scroll-mt-40 bg-dent-card border border-slate-200 rounded-[2.5rem] p-8 shadow-2xl shadow-blue-900/5 flex flex-col justify-center relative overflow-hidden group"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-2 bg-dent-accent shadow-[0_2px_10px_rgba(0,165,233,0.3)] transition-all group-hover:h-3"
+          >
+          </div>
+
+          <header class="mb-8 text-center md:text-left border-b border-slate-100 pb-6">
+            <h2
+              class="text-2xl font-black text-dent-dark italic tracking-tighter uppercase leading-none"
+            >
+              Acceso <br /><span class="text-dent-accent">Clientes</span>
+            </h2>
+            <div class="w-10 h-1 bg-dent-accent/20 mt-4 rounded-full mx-auto md:mx-0"></div>
+          </header>
+
+          <LoginForm />
+        </div>
+      </section>
+
+      <ServiciosBento />
+
+      <TechStack />
+
+      <TeamBento />
+      <Faq />
+    </div>
+
+    <section class="mt-20 md:mt-32 pb-8 md:pb-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 w-full">
+          <!-- Tarjeta de Contacto -->
+          <div
+            id="contacto"
+            class="scroll-mt-24 md:col-span-2 bg-dent-card rounded-[2.5rem] p-6 sm:p-10 shadow-xl border border-slate-200 overflow-hidden relative"
+          >
+            <div
+              class="absolute -top-10 -right-10 w-32 h-32 bg-dent-accent/10 rounded-full blur-3xl"
+            >
+            </div>
+            <div class="mb-8 relative z-10">
+              <h3
+                class="text-dent-dark font-black text-xl lg:text-2xl italic uppercase tracking-tighter"
+              >
+                ¿Hablamos?
+              </h3>
+              <p class="text-slate-500 text-[10px] mt-2 uppercase tracking-widest font-black">
+                Solicita acceso: <span class="text-dent-accent">soporte@laboratoriodental.com</span>
+              </p>
+            </div>
+
+            <!-- componente de formulario -->
+            <ContactForm />
+          </div>
+
+          <!-- Tarjeta del Mapa CORREGIDA -->
+          <div
+            class="md:col-span-2 bg-dent-card border border-slate-200 rounded-[2.5rem] overflow-hidden min-h-[350px] relative group shadow-xl"
+          >
+            <!-- Etiqueta flotante del mapa: ahora en la parte inferior y no bloquea clics -->
+            <div
+              class="absolute bottom-6 left-6 z-10 bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-xl transition-all group-hover:translate-y-[-5px] pointer-events-none"
+            >
+              <p class="text-dent-dark text-[10px] font-black uppercase tracking-[0.2em] mb-1">
+                Sede Central
+              </p>
+              <p class="text-dent-accent text-[11px] font-bold italic">
+                Av de Sor Teresa Prat, 15, Málaga
+              </p>
+            </div>
+
+            <!-- Iframe del mapa -->
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3198.816434418641!2d-4.4468641!3d36.7029517!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd72f7902787c88b%3A0xb143f656247738f6!2sAv.%20de%20Sor%20Teresa%20Prat%2C%2015%2C%2029003%20M%C3%A1laga!5e0!3m2!1ses!2ses!4v1700000000000"
+              class="w-full h-full grayscale opacity-70 hover:opacity-100 transition-all duration-1000 group-hover:grayscale-0"
+              style="border:0;"
+              allowfullscreen=""
+              loading="lazy"></iframe>
+          </div>
+
+          <!-- Barra de estado inferior -->
+          <div
+            class="md:col-span-4 bg-dent-card border border-slate-200 rounded-[2.5rem] md:rounded-full p-5 flex flex-wrap md:flex-row items-center justify-center gap-4 md:gap-8 shadow-sm"
+          >
+            <div class="flex gap-3 items-center">
+              <div
+                class="w-2.5 h-2.5 rounded-full bg-status-success animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+              >
+              </div>
+              <div class="text-[10px] text-status-success font-black uppercase tracking-[0.3em]">
+                Servicio Activo
+              </div>
+            </div>
+            <div class="hidden lg:block h-4 w-px bg-slate-200"></div>
+            <p
+              class="text-slate-500 text-[10px] italic font-bold uppercase tracking-widest text-center"
+            >
+              Soporte técnico: 09:00 - 19:00 | <span class="text-dent-dark font-black"
+                >+34 951 000 000</span
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

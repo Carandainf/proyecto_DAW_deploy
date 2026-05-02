@@ -1,0 +1,99 @@
+---
+/**
+ * PÁGINA: AVISO LEGAL
+ * @description Yo del futuro: Es una página estática, pero debe mantener
+ * la coherencia visual. He usado un max-w-3xl para que las líneas de texto
+ * no sean infinitas, lo que mejora mucho la lectura.
+ */
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Aviso Legal - Laboratorio Dental" darkMode={false}>
+  <main
+    class="min-h-screen p-4 sm:p-8 flex justify-center items-start legal-layout bg-dent-bg transition-all"
+  >
+    <div
+      class="max-w-3xl w-full bg-dent-card border border-dent-border rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-blue-900/5 relative overflow-hidden"
+    >
+      <div class="absolute -top-24 -right-24 w-48 h-48 bg-dent-accent/5 rounded-full blur-3xl">
+      </div>
+
+      <header class="mb-10 relative z-10">
+        <h1 class="text-4xl md:text-5xl font-black text-dent-dark tracking-tighter italic">
+          Aviso <span class="text-dent-accent">Legal</span>
+        </h1>
+        <p class="text-slate-400 text-[10px] uppercase tracking-[0.3em] font-black mt-2">
+          Última actualización: Abril 2026
+        </p>
+      </header>
+
+      <div class="space-y-8 text-slate-500 text-sm md:text-base leading-relaxed relative z-10">
+        <section class="group">
+          <h2
+            class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
+          >
+            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            1. Información Identificativa
+          </h2>
+          <p class="pl-6 border-l-2 border-slate-50">
+            En cumplimiento con el deber de información recogido en artículo 10 de la Ley 34/2002,
+            de 11 de julio, los datos corresponden al titular de la web:
+            <strong class="text-dent-dark font-bold">DentalLab</strong>, NIF <span
+              class="font-mono text-xs">12.345.678-E</span
+            >, con domicilio en Málaga.
+          </p>
+        </section>
+
+        <section class="group">
+          <h2
+            class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
+          >
+            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            2. Propiedad Intelectual
+          </h2>
+          <p class="pl-6 border-l-2 border-slate-50">
+            Los contenidos de este sitio, incluyendo diseños, logotipos, textos y código fuente, son
+            propiedad exclusiva del <span class="italic">Laboratorio Dental Digital</span>
+            o sus respectivos autores, quedando prohibida su reproducción total o parcial sin autorización.
+          </p>
+        </section>
+
+        <section class="group">
+          <h2
+            class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
+          >
+            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            3. Exclusión de Responsabilidad
+          </h2>
+          <p class="pl-6 border-l-2 border-slate-50">
+            El laboratorio no se hace responsable de los errores de conexión, caídas del servidor o
+            el mal uso de las credenciales de acceso por parte de los clientes registrados.
+          </p>
+        </section>
+
+        <div class="pt-10 border-t border-slate-100 mt-12">
+          <a
+            href="/#login-section"
+            class="inline-flex items-center gap-3 text-slate-400 hover:text-dent-accent font-black text-[10px] uppercase tracking-[0.2em] transition-all group/link"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="group-hover/link:-translate-x-1 transition-transform"
+            >
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+            Volver al inicio
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

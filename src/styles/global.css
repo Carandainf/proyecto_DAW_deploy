@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/* Importación de fuente variable optimizada */
+@import "../../node_modules/@fontsource-variable/inter/index.css";
+
+@theme {
+  /* --- PALETA DE COLORES (Estilo 404) --- */
+  --color-dent-bg: #f1f5f9;
+  --color-dent-card: #ffffff;
+  --color-dent-border: #d1d5db;
+  --color-dent-accent: #0ea5e9;
+  --color-dent-dark: #0f172a;
+
+  --color-status-pending: #f59e0b;
+  --color-status-success: #10b981;
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
+  /* --- ANIMACIONES DE LA 404 (Globalizadas) --- */
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-float-slow: float 8s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 3s infinite ease-in-out;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+  }
+
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+}
+
+/* --- REGLAS BASE --- */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    --color-dent-bg: #020617;
+    --color-dent-card: #0f172a;
+    --color-dent-border: #1e293b;
+    --color-dent-dark: #f8fafc;
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-dent-bg text-dent-dark font-sans antialiased transition-colors duration-300;
+    /* Fuente fluida para que se vea bien en 1080p y en 1024p */
+    font-size: clamp(0.875rem, 0.5vw + 0.75rem, 1rem);
+  }
+}
+
+/* --- COMPONENTES UNIFORMES (Botones estilo 404) --- */
+@layer components {
+  /* El botón "Cian" que tanto te gusta */
+  .btn-primary {
+    @apply bg-dent-accent text-white font-medium py-2 px-6 rounded-full
+           hover:brightness-110 transition-all shadow-lg shadow-dent-accent/20 
+           active:scale-95 text-sm cursor-pointer inline-flex items-center justify-center gap-2;
+  }
+
+  /* El botón "Border" oscuro/slate */
+  .btn-secondary {
+    @apply border border-slate-700 text-slate-300 font-medium py-2 px-6 rounded-full
+           hover:bg-slate-800 transition-all text-sm cursor-pointer inline-flex items-center justify-center gap-2;
+  }
+
+  /* Inputs modernos y uniformes */
+  .dent-input {
+    @apply w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3 px-5 
+           text-white outline-hidden focus:border-dent-accent/50 focus:ring-1 
+           focus:ring-dent-accent/20 transition-all placeholder:text-slate-600;
+  }
+}
+
+/* --- UTILIDADES Y SCROLLBARS --- */
+@layer utilities {
+  /* Scrollbar Fina y Elegante para Contenedores (Chat, Listas) */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #1e293b transparent; /* Slate-800 */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1e293b; /* Slate-800 */
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-dent-accent);
+  }
+
+  /* Ocultar scrollbar pero mantener funcionalidad */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-linear-to-r from-white to-slate-500;
+  }
+
+  /* utilidad para divisiones internas con más "carácter" */
+  .inner-divider {
+    @apply border-t border-slate-200 dark:border-slate-800;
+  }
+
+  /* Efecto de relieve suave para los Bento claros */
+  .bento-shadow {
+    @apply shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-slate-300/50;
+  }
+
+  /* Efecto de cristal para tarjetas si lo necesitas */
+  .glass-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Corrección para autocompletado y selección en modo oscuro */
+@layer base {
+  input:-webkit-autofill,
+  textarea:-webkit-autofill {
+    -webkit-text-fill-color: white !important;
+    /* Esto simula el fondo de tu .dent-input */
+    -webkit-box-shadow: 0 0 0px 1000px #0f172a inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  ::selection {
+    background-color: var(--color-dent-accent);
+    color: #020617;
+  }
+}
+
+/* Animación para que el modal "flote" al aparecer */
+dialog[open] {
+  animation: modalShow 0.4s ease-out forwards;
+}
+
+/* Animación para el oscurecimiento del fondo (backdrop) */
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0);
+  backdrop-filter: blur(0px);
+  transition: all 0.4s ease-out;
+}
+
+dialog[open]::backdrop {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+@keyframes modalShow {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* --- ANIMACIONES ESPECÍFICAS DEL HERO --- */
+@layer utilities {
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradient-shift 4s linear infinite;
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}
+
+@layer utilities {
+  /* Clase para el contenedor principal de páginas de texto legales */
+  .legal-layout {
+    /* Reducimos el padding top para que no esté tan lejos de la Navbar */
+    @apply pt-12 md:pt-16 pb-12;
+  }
+}

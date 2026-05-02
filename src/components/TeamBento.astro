@@ -1,0 +1,120 @@
+---
+/**
+ * @file TeamBento.astro (Versión Evolucionada)
+ * @description Presentación del equipo con estética Tech-Artesanal.
+ */
+import type { TeamMember } from "../types/dentallab";
+
+const team = [
+  {
+    name: "Alejandro Ruiz",
+    role: "CAD/CAM Specialist",
+    bio: "Experto en flujo digital completo, transforma escaneos intraorales en estructuras de precisión micrométrica.",
+    image: "/team/alejandro.webp",
+    gridSpan: "md:col-span-2",
+    accent: "from-blue-500/20",
+  },
+  {
+    name: "Carmen García",
+    role: "Maestra Ceramista",
+    bio: "Domina la estratificación manual sobre disilicato para acabados naturales.",
+    image: "/team/carmen.webp",
+    accent: "from-cyan-500/20",
+  },
+  {
+    name: "Manuel Jiménez",
+    role: "Senior Removible",
+    bio: "Especialista en casos complejos de edentulismo y anclajes sobre implantes.",
+    image: "/team/manuel.webp",
+    accent: "from-indigo-500/20",
+  },
+  {
+    name: "Rocío Morales",
+    role: "Diseño Exocad",
+    bio: "Planifica rehabilitaciones complejas mediante software e impresión 3D de alta resolución.",
+    image: "/team/rocio.webp",
+    gridSpan: "md:col-span-2",
+    accent: "from-sky-500/20",
+  },
+  {
+    name: "Javier López",
+    role: "Modelos Maestros",
+    bio: "Asegura la fidelidad absoluta y la preparación crítica de troqueles.",
+    image: "/team/javier.webp",
+    accent: "from-blue-400/20",
+  },
+  {
+    name: "María Flores",
+    role: "Administración",
+    bio: "Gestiona la logística y asegura la comunicación fluida con cada clínica.",
+    image: "/team/maria.webp",
+    accent: "from-slate-400/20",
+  },
+];
+---
+
+<section id="equipo" class="scroll-mt-24 mt-20 md:mt-32 w-full">
+  <header class="max-w-3xl mb-12 relative">
+    <div class="flex gap-3 items-center mb-4">
+      <div class="w-1.5 h-6 bg-dent-accent rounded-full animate-pulse"></div>
+      <h2
+        class="text-3xl sm:text-5xl font-black text-dent-dark italic tracking-tighter uppercase leading-none"
+      >
+        Factor <span class="text-dent-accent">Humano</span>
+        <br /> Digital
+      </h2>
+    </div>
+    <p class="text-slate-500 text-sm md:text-lg font-medium italic leading-relaxed max-w-xl">
+      Detrás de cada fresado digital hay un maestro artesano supervisando la perfección.
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+    {
+      team.map((m) => (
+        <article
+          class={`group relative overflow-hidden rounded-[2.5rem] border border-dent-border bg-dent-card transition-all duration-500 hover:border-dent-accent/30 hover:shadow-2xl hover:shadow-dent-accent/10 ${m.gridSpan ?? ""}`}
+        >
+          {/* Fondo de acento dinámico en hover */}
+          <div
+            class={`absolute inset-0 bg-linear-to-br ${m.accent} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700`}
+          />
+          <div class="p-8 relative z-10 flex flex-col h-full">
+            <div class="flex items-start justify-between mb-8">
+              <div class="relative">
+                <div class="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 border-slate-100 group-hover:border-dent-accent transition-all duration-500 rotate-3 group-hover:rotate-0 shadow-lg">
+                  <img
+                    src={m.image}
+                    alt={m.name}
+                    class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
+                  />
+                </div>
+                <div class="absolute -top-1 -right-1 w-4 h-4 bg-status-success rounded-full border-4 border-white animate-pulse" />
+              </div>
+
+              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-dent-accent transition-colors">
+                Staff_0{team.indexOf(m) + 1}
+              </span>
+            </div>
+            <div class="mt-auto">
+              <p class="text-dent-accent text-[10px] font-black uppercase tracking-widest mb-1">
+                {m.role}
+              </p>
+              <h4 class="text-xl md:text-2xl font-black text-dent-dark italic uppercase tracking-tighter leading-none mb-3">
+                {m.name}
+              </h4>
+              <div class="overflow-hidden max-h-0 group-hover:max-h-32 transition-all duration-700 ease-in-out">
+                <p class="text-slate-500 text-xs font-medium leading-relaxed italic pt-4 mt-2 border-t-2 border-slate-100">
+                  {m.bio}
+                </p>
+              </div>
+            </div>{" "}
+          </div>{" "}
+          <div class="absolute -bottom-6 -right-6 text-slate-100/50 text-8xl font-black italic select-none pointer-events-none group-hover:text-dent-accent/5 transition-colors">
+            {m.name.split(" ")[0][0]}
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</section>

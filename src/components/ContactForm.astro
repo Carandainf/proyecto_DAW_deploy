@@ -1,0 +1,196 @@
+---
+/**
+ * @file ContactForm.astro
+ * @description Formulario de contacto profesional con validación de seguridad 'Honeypot'.
+ * Diseñado para integrarse en la landing page, gestionando el envío vía API y feedback visual.
+ */
+---
+
+<form id="contactForm" class="space-y-5 relative">
+  <!-- Honeypot (Seguridad) -->
+  <div class="hidden" aria-hidden="true">
+    <input type="text" name="website_url" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <!-- Campo: Nombre -->
+    <div class="flex flex-col gap-2 group">
+      <label
+        class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black ml-1 group-focus-within:text-dent-accent transition-colors"
+      >
+        Nombre de la Clínica
+      </label>
+      <input
+        name="nombre"
+        type="text"
+        placeholder="Ej. Clínica Dental Sol"
+        required
+        class="w-full bg-slate-50 border border-slate-200 text-dent-dark p-4 rounded-2xl text-xs outline-none focus:border-dent-accent focus:bg-white focus:ring-4 focus:ring-dent-accent/5 transition-all shadow-sm placeholder:text-slate-400"
+      />
+    </div>
+
+    <!-- Campo: Email -->
+    <div class="flex flex-col gap-2 group">
+      <label
+        class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black ml-1 group-focus-within:text-dent-accent transition-colors"
+      >
+        Email Profesional
+      </label>
+      <input
+        name="email"
+        type="email"
+        placeholder="doctor@ejemplo.com"
+        required
+        class="w-full bg-slate-50 border border-slate-200 text-dent-dark p-4 rounded-2xl text-xs outline-none focus:border-dent-accent focus:bg-white focus:ring-4 focus:ring-dent-accent/5 transition-all shadow-sm placeholder:text-slate-400"
+      />
+    </div>
+  </div>
+
+  <!-- Campo: Asunto -->
+  <div class="flex flex-col gap-2 group">
+    <label
+      class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black ml-1 group-focus-within:text-dent-accent transition-colors"
+    >
+      Asunto
+    </label>
+    <input
+      name="asunto"
+      type="text"
+      placeholder="¿En qué podemos ayudarte?"
+      required
+      class="w-full bg-slate-50 border border-slate-200 text-dent-dark p-4 rounded-2xl text-xs outline-none focus:border-dent-accent focus:bg-white focus:ring-4 focus:ring-dent-accent/5 transition-all shadow-sm placeholder:text-slate-400"
+    />
+  </div>
+
+  <!-- Campo: Mensaje -->
+  <div class="flex flex-col gap-2 group">
+    <label
+      class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black ml-1 group-focus-within:text-dent-accent transition-colors"
+    >
+      Mensaje detallado
+    </label>
+    <textarea
+      name="mensaje"
+      rows="4"
+      placeholder="Describe tu consulta o caso clínico..."
+      required
+      class="w-full bg-slate-50 border border-slate-200 text-dent-dark p-4 rounded-2xl text-xs outline-none focus:border-dent-accent focus:bg-white focus:ring-4 focus:ring-dent-accent/5 transition-all shadow-sm resize-none placeholder:text-slate-400"
+    ></textarea>
+  </div>
+
+  <!-- Tarjeta de Privacidad -->
+  <div class="bg-slate-100/50 p-4 rounded-2xl border border-slate-200 shadow-inner">
+    <div class="flex items-start gap-3">
+      <div class="relative flex items-center h-5">
+        <input
+          type="checkbox"
+          id="privacy"
+          required
+          class="w-4 h-4 rounded border-slate-300 bg-white text-dent-accent focus:ring-dent-accent transition-all"
+        />
+      </div>
+      <label for="privacy" class="text-[10px] text-slate-500 leading-normal">
+        Acepto que mis datos sean tratados para gestionar esta consulta profesional. He leído la <a
+          href="/privacidad"
+          class="text-dent-accent hover:text-dent-dark transition-colors font-bold underline decoration-dent-accent/30"
+          >Política de Privacidad</a
+        >.
+      </label>
+    </div>
+  </div>
+
+  <!-- Botón de Envío -->
+  <button
+    type="submit"
+    id="submitBtn"
+    class="group w-full py-4 bg-dent-accent text-white font-black rounded-2xl text-xs uppercase tracking-[0.3em] hover:bg-dent-dark hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-dent-accent/20 flex justify-center items-center gap-3"
+  >
+    <span>Enviar Mensaje</span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="3"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="m22 2-7 20-4-9-9-4Z"></path>
+      <path d="M22 2 11 13"></path>
+    </svg>
+  </button>
+
+  <div
+    id="formStatus"
+    class="hidden p-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-center transition-all duration-300"
+  >
+  </div>
+</form>
+
+<script>
+  /**
+   *
+   * * @description Lógica de cliente para procesar el envío del formulario.
+   * * Incluye bloqueo de UI durante la petición y manejo de estados (éxito/error).
+   *
+   * */
+
+  const form = document.getElementById("contactForm") as HTMLFormElement;
+  const status = document.getElementById("formStatus");
+  const btn = document.getElementById("submitBtn") as HTMLButtonElement;
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    if (formData.get("website_url")) return;
+
+    btn.disabled = true;
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = `<span class="animate-pulse">ENVIANDO...</span>`;
+
+    try {
+      const res = await fetch("/api/contacto/enviar", {
+        method: "POST",
+        body: JSON.stringify(Object.fromEntries(formData)),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.ok && status) {
+        status.textContent = "✓ Mensaje enviado correctamente";
+        status.className =
+          "p-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-center bg-emerald-100 text-emerald-600 block border border-emerald-200 animate-fade-in";
+        form.reset();
+        setTimeout(() => status.classList.add("hidden"), 5000);
+      } else {
+        throw new Error();
+      }
+    } catch (e) {
+      if (status) {
+        status.textContent = "✕ Error al procesar el envío";
+        status.className =
+          "p-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-center bg-red-100 text-red-600 block border border-red-200";
+      }
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalContent;
+    }
+  });
+</script>
+
+<style>
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

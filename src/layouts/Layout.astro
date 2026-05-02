@@ -1,0 +1,67 @@
+---
+/**
+ * @file Layout.astro
+ * @description Estructura base corregida.
+ * Se elimina la carga de Google Fonts ya que utilizo Inter Variable de forma local vía CSS.
+ */
+import "../styles/global.css";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+
+const { title = "DentalLab - Precisión Digital", darkMode = false } = Astro.props;
+const { pathname } = Astro.url;
+const isLegalPage = ["/privacidad", "/aviso-legal", "/cookies"].includes(pathname);
+// Detectamos si estamos en cualquier ruta del dashboard
+const isDashboard = pathname.includes("/dashboard");
+---
+
+<html lang="es" class={darkMode ? "dark" : ""}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+
+  <body
+    class="bg-dent-bg text-dent-dark antialiased min-h-screen flex flex-col transition-colors duration-300 relative"
+  >
+    <Navbar />
+
+    <div class={`grow w-full ${isDashboard ? "pt-0" : "pt-24"}`}>
+      <slot />
+    </div>
+
+    {!isLegalPage && <Footer />}
+
+    <style is:global>
+      html {
+        scroll-behavior: smooth;
+      }
+    </style>
+  </body>
+</html>
+
+<script>
+  /**
+   * LÓGICA DE CLIENTE (Hydration)
+   * @description Scripts ejecutados en el navegador para funcionalidades post-renderizado.
+   */
+  const isDashboard = window.location.pathname.includes("/dashboard");
+
+  if (isDashboard) {
+    /**
+     * @todo Implementar WebSockets o SSE para actualizaciones en tiempo real.
+     * De momento, se mantiene comentada la lógica de refresco periódico
+     * para evitar pérdida de datos en formularios activos.
+     */
+    /*
+    setInterval(() => {
+      const isTyping = ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName || "");
+      if (!isTyping) {
+        window.location.reload();
+      }
+    }, 60000); 
+    */
+  }
+</script>

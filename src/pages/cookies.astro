@@ -1,0 +1,132 @@
+---
+/**
+ * PÁGINA: POLÍTICA DE COOKIES
+ * @description Yo del futuro: Importante recordar que NO usamos cookies de terceros.
+ * Solo usamos cookies de sesión (técnicas). Esto es un punto a favor en privacidad.
+ */
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Política de Cookies - Laboratorio Dental" darkMode={false}>
+  <main
+    class="min-h-screen p-4 sm:p-8 flex justify-center items-start legal-layout bg-dent-bg transition-all"
+  >
+    <div
+      class="max-w-3xl w-full bg-dent-card border border-dent-border rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-blue-900/5 relative overflow-hidden"
+    >
+      <div class="absolute -top-24 -left-24 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px]">
+      </div>
+
+      <header class="mb-10 relative z-10">
+        <h1 class="text-4xl md:text-5xl font-black text-dent-dark tracking-tighter italic">
+          Política de <span class="text-dent-accent">Cookies</span>
+        </h1>
+        <p class="text-slate-400 text-[10px] uppercase tracking-[0.3em] font-black mt-2">
+          Transparencia y Privacidad
+        </p>
+      </header>
+
+      <div class="space-y-8 text-slate-500 text-sm md:text-base leading-relaxed relative z-10">
+        <div
+          class="bg-emerald-500/5 border border-emerald-500/10 p-6 rounded-[1.5rem] flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+        >
+          <div
+            class="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center shrink-0"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6 text-emerald-600"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg
+            >
+          </div>
+          <div>
+            <p class="text-emerald-700 font-black text-xs uppercase tracking-widest">
+              Navegación Privada
+            </p>
+            <p class="text-[11px] md:text-xs text-emerald-800/60 mt-1">
+              Este sitio web <strong>no utiliza cookies de seguimiento ni publicidad</strong> para visitantes
+              públicos. Respetamos tu privacidad por defecto.
+            </p>
+          </div>
+        </div>
+
+        <section class="group">
+          <h2
+            class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
+          >
+            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            1. ¿Qué son las cookies?
+          </h2>
+          <p class="pl-6 border-l-2 border-slate-50">
+            Una cookie es un pequeño archivo de texto que se almacena en tu navegador. Sirven para
+            recordar accesos y mejorar la funcionalidad técnica del sitio.
+          </p>
+        </section>
+
+        <section class="group">
+          <h2
+            class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
+          >
+            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            2. Cookies Técnicas (Dashboard)
+          </h2>
+          <div class="pl-6 border-l-2 border-slate-50 space-y-4">
+            <p>
+              Solo activamos cookies cuando un profesional accede a su panel de gestión privado. Son
+              esenciales para:
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <span class="text-dent-accent font-bold">01.</span>
+                <span class="text-xs md:text-sm"
+                  ><strong>Autenticación:</strong> Identificar tu sesión para que no tengas que loguearte
+                  en cada clic.</span
+                >
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-dent-accent font-bold">02.</span>
+                <span class="text-xs md:text-sm"
+                  ><strong>Seguridad:</strong> Protegemos tus datos contra ataques de interceptación de
+                  sesión (CSRF).</span
+                >
+              </li>
+            </ul>
+            <p class="text-[11px] italic bg-slate-50 p-3 rounded-lg text-slate-400">
+              * Según el Art. 22.2 de la LSSI, estas cookies están exentas de consentimiento al ser
+              estrictamente necesarias para el servicio.
+            </p>
+          </div>
+        </section>
+
+        <div class="pt-10 border-t border-slate-100 mt-12">
+          <a
+            href="/#login-section"
+            class="inline-flex items-center gap-3 text-slate-400 hover:text-dent-accent font-black text-[10px] uppercase tracking-[0.2em] transition-all group/link"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="group-hover/link:-translate-x-1 transition-transform"
+            >
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+            Volver al inicio
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

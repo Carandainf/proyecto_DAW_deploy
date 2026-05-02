@@ -1,0 +1,246 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { protectRoute } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+const { shouldRedirect, url, user } = await protectRoute(Astro.request, "admin");
+if (shouldRedirect) return Astro.redirect(url);
+
+// Traemos los trabajos que tienen mensajes y que NO están completados
+const trabajos = await prisma.archivo.findMany({
+  where: {
+    mensajes: { some: {} }, // Que tengan mensajes
+    NOT: {
+      estado: "completado", // EXCLUIMOS los que ya terminamos
+    },
+  },
+  include: {
+    usuario: true,
+    mensajes: {
+      orderBy: { fecha_envio: "desc" },
+      include: { emisor: true },
+    },
+  },
+});
+
+// Ordenar por el mensaje más reciente de cada hilo
+const trabajosOrdenados = trabajos.sort((a, b) => {
+  return b.mensajes[0].fecha_envio.getTime() - a.mensajes[0].fecha_envio.getTime();
+});
+---
+
+<Layout title="Centro de Mensajes | Admin" darkMode={true}>
+  <main class="max-w-6xl mx-auto px-6 pb-12 pt-28 md:pt-36 transition-all">
+    <div class="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+      <div>
+        <button
+          onclick="history.back()"
+          class="inline-flex items-center gap-2 text-slate-500 hover:text-dent-accent transition-colors text-[10px] font-black uppercase tracking-widest mb-4 group cursor-pointer"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            class="group-hover:-translate-x-1 transition-transform"
+            ><path d="m15 18-6-6 6-6"></path></svg
+          >
+          Volver al panel
+        </button>
+        <h1 class="text-4xl md:text-5xl font-black text-white italic uppercase tracking-tighter">
+          Centro de <span class="text-dent-accent">Mensajes</span>
+        </h1>
+        <p class="text-slate-500 font-medium mt-2">
+          Gestiona la comunicación de los trabajos <span
+            class="text-slate-200 font-bold border-b border-dent-accent/40">activos</span
+          >.
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+        <div class="relative group flex-1 sm:flex-initial">
+          <span
+            class="absolute inset-y-0 left-4 flex items-center text-slate-500 group-focus-within:text-dent-accent transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg
+            >
+          </span>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="BUSCAR DOCTOR O TRABAJO..."
+            class="bg-dent-card border border-dent-border rounded-full py-3 pl-11 pr-4 text-[10px] font-black text-white focus:outline-none focus:ring-2 focus:ring-dent-accent/30 w-full sm:w-64 transition-all placeholder:text-slate-600 uppercase tracking-widest"
+          />
+        </div>
+
+        <div class="relative">
+          <select
+            id="filter-status"
+            class="appearance-none bg-dent-card border border-dent-border rounded-full px-6 py-3 text-[10px] font-black text-slate-200 uppercase outline-none cursor-pointer hover:border-dent-accent transition-all w-full sm:w-[200px] tracking-widest"
+          >
+            <option value="all" class="bg-slate-900 text-white">TODOS LOS HILOS</option>
+            <option value="pending" class="bg-slate-900 text-dent-accent">NECESITA RESPUESTA</option
+            >
+          </select>
+          <div
+            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-dent-accent"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"><path d="m6 9 6 6 6-6"></path></svg
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="conversations-list" class="grid gap-4">
+      {
+        trabajosOrdenados.map((t) => {
+          const necesitaRespuesta = t.mensajes[0].emisor.role === "user";
+
+          return (
+            <div
+              class="conversation-item bg-dent-card border border-dent-border p-6 rounded-[2rem] hover:border-dent-accent/50 transition-all group flex flex-col md:flex-row md:items-center justify-between gap-6"
+              data-search={`${t.usuario.name} ${t.nombre_archivo}`.toLowerCase()}
+              data-pending={necesitaRespuesta ? "true" : "false"}
+            >
+              <div class="flex items-center gap-4">
+                <div class="relative">
+                  <div class="w-14 h-14 rounded-2xl bg-dent-accent/10 flex items-center justify-center text-dent-accent font-black border border-dent-accent/20 text-lg">
+                    {t.usuario.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  {necesitaRespuesta && (
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-dent-accent rounded-full border-[3px] border-dent-dark flex items-center justify-center">
+                      <span class="w-2 h-2 bg-dent-dark rounded-full animate-pulse" />
+                    </span>
+                  )}
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-white font-black group-hover:text-dent-accent transition-colors truncate uppercase tracking-tight text-lg">
+                    {t.nombre_archivo}
+                  </h3>
+                  <p class="text-[10px] text-slate-500 uppercase font-black tracking-[0.15em]">
+                    Dr/a. <span class="text-slate-300">{t.usuario.name}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex-1 md:px-10 lg:border-l lg:border-white/5">
+                <div class="flex items-center gap-3 mb-2">
+                  <span
+                    class={`text-[9px] px-3 py-1 rounded-full uppercase font-black tracking-widest border ${necesitaRespuesta ? "bg-dent-accent text-dent-dark border-dent-accent" : "bg-slate-800 text-slate-400 border-white/5"}`}
+                  >
+                    {necesitaRespuesta ? "Pendiente" : "Respondido"}
+                  </span>
+                  <span class="text-[11px] text-slate-500 font-bold font-mono">
+                    {new Date(t.mensajes[0].fecha_envio).toLocaleString("es-ES", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <p class="text-sm text-slate-400 line-clamp-1 italic font-medium">
+                  "{t.mensajes[0].contenido}"
+                </p>
+              </div>
+
+              <a
+                href={`/dashboard/admin/trabajo/${t.id_archivo}`}
+                class="flex items-center justify-center gap-2 bg-slate-900 border border-white/10 group-hover:bg-dent-accent group-hover:text-dent-dark text-slate-200 font-black py-4 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all whitespace-nowrap active:scale-95"
+              >
+                Abrir Chat
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </a>
+            </div>
+          );
+        })
+      }
+    </div>
+
+    <div id="no-results" class="hidden py-32 text-center">
+      <div
+        class="bg-dent-card w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border border-dent-border shadow-inner"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-10 h-10 text-slate-700"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+          ></path></svg
+        >
+      </div>
+      <p class="text-slate-500 font-black uppercase text-xs tracking-widest">
+        No hay conversaciones activas
+      </p>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  // El script se mantiene igual en lógica, solo me aseguro de que los IDs coincidan
+  const searchInput = document.getElementById("search-input") as HTMLInputElement;
+  const filterStatus = document.getElementById("filter-status") as HTMLSelectElement;
+  const items = document.querySelectorAll(".conversation-item");
+  const noResults = document.getElementById("no-results");
+
+  function filter() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const statusTerm = filterStatus.value;
+    let visibleCount = 0;
+
+    items.forEach((item: any) => {
+      const text = item.getAttribute("data-search");
+      const isPending = item.getAttribute("data-pending") === "true";
+
+      const matchesSearch = text.includes(searchTerm);
+      const matchesStatus = statusTerm === "all" || (statusTerm === "pending" && isPending);
+
+      if (matchesSearch && matchesStatus) {
+        item.style.display = "flex";
+        visibleCount++;
+      } else {
+        item.style.display = "none";
+      }
+    });
+
+    noResults?.classList.toggle("hidden", visibleCount > 0);
+  }
+
+  searchInput?.addEventListener("input", filter);
+  filterStatus?.addEventListener("change", filter);
+</script>

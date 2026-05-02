@@ -1,0 +1,129 @@
+---
+/**
+ * PÁGINA: POLÍTICA DE PRIVACIDAD
+ * @description Yo del futuro: He estructurado las secciones con bordes sutiles
+ * para que no parezca un muro de texto. El tono es profesional y técnico.
+ */
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Política de Privacidad - Laboratorio Dental" darkMode={false}>
+  <main
+    class="min-h-screen p-4 sm:p-8 flex justify-center items-start legal-layout bg-dent-bg transition-all"
+  >
+    <div
+      class="max-w-3xl w-full bg-dent-card border border-dent-border rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-blue-900/5 relative overflow-hidden"
+    >
+      <div class="absolute -top-24 -right-24 w-48 h-48 bg-dent-accent/5 rounded-full blur-3xl">
+      </div>
+
+      <header class="mb-10 relative z-10">
+        <h1 class="text-4xl md:text-5xl font-black text-dent-dark tracking-tighter italic">
+          Política de <span class="text-dent-accent">Privacidad</span>
+        </h1>
+        <p class="text-slate-400 text-[10px] uppercase tracking-[0.3em] font-black mt-2">
+          Protección de datos profesionales
+        </p>
+      </header>
+
+      <div class="space-y-8 text-slate-500 text-sm md:text-base leading-relaxed relative z-10">
+        <div
+          class="bg-slate-50 border border-slate-100 p-6 rounded-2xl italic text-[13px] text-slate-400"
+        >
+          <p>
+            <span class="text-dent-dark font-black uppercase text-[10px] tracking-widest block mb-2"
+              >Compromiso</span
+            >
+            Solo solicitamos los datos estrictamente necesarios para gestionar tu cuenta profesional y
+            la logística de tus prótesis. Nunca vendemos tus datos a terceros ni los usamos para fines
+            ajenos a la actividad dental.
+          </p>
+        </div>
+
+        <section class="group">
+          <h2
+            class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
+          >
+            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            1. Responsable del Tratamiento
+          </h2>
+          <p class="pl-6 border-l-2 border-slate-50">
+            El responsable de los datos recogidos en esta web es
+            <strong class="text-dent-dark font-bold">DentalLab</strong>, con domicilio en Málaga y
+            email de contacto
+            <span class="text-dent-accent/80 font-bold underline decoration-dent-accent/20 italic"
+              >contacto@tulaboratorio.com</span
+            >.
+          </p>
+        </section>
+
+        <section class="group">
+          <h2
+            class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
+          >
+            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            2. Finalidad
+          </h2>
+          <p class="pl-6 border-l-2 border-slate-50">
+            Tratamos la información que nos facilitan las personas interesadas con el fin de:
+          </p>
+          <ul class="pl-10 mt-3 space-y-2 list-disc marker:text-dent-accent">
+            <li>Gestionar solicitudes de contacto y presupuestos.</li>
+            <li>Habilitar el acceso al portal de gestión de trabajos protésicos.</li>
+            <li>Coordinar la logística de recogida y entrega de piezas.</li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <h2
+            class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
+          >
+            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            3. Conservación de Datos
+          </h2>
+          <p class="pl-6 border-l-2 border-slate-50">
+            Los datos personales proporcionados se conservarán mientras se mantenga la relación
+            comercial o durante los años necesarios para cumplir con las obligaciones legales.
+          </p>
+        </section>
+
+        <section class="group">
+          <h2
+            class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
+          >
+            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            4. Tus Derechos
+          </h2>
+          <p class="pl-6 border-l-2 border-slate-50">
+            Cualquier persona tiene derecho a obtener confirmación sobre si estamos tratando sus
+            datos. Tienes derecho a <strong>acceder, rectificar, limitar o suprimir</strong> tus datos
+            enviándonos un email adjuntando copia de tu DNI/NIF para verificar tu identidad.
+          </p>
+        </section>
+
+        <div class="pt-10 border-t border-slate-100 mt-12">
+          <a
+            href="/#login-section"
+            class="inline-flex items-center gap-3 text-slate-400 hover:text-dent-accent font-black text-[10px] uppercase tracking-[0.2em] transition-all group/link"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="group-hover/link:-translate-x-1 transition-transform"
+            >
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+            Volver al inicio
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

@@ -1,0 +1,347 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { protectRoute } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+// 1. Protección de ruta (Solo Admins)
+const { shouldRedirect, url, user: adminUser } = await protectRoute(Astro.request, "admin");
+if (shouldRedirect) return Astro.redirect(url);
+
+// 2. Traemos todos los trabajos con el nombre del usuario
+const historialCompleto = await prisma.archivo.findMany({
+  include: { usuario: true },
+  orderBy: { fecha_subida: "desc" },
+});
+---
+
+<Layout title="Historial Global | Admin Console" darkMode={true}>
+  <main
+    class="min-h-screen pt-28 md:pt-36 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto transition-all"
+  >
+    <header
+      class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-12 relative"
+    >
+      <div class="relative z-10">
+        <button
+          onclick="history.back()"
+          class="inline-flex items-center gap-2 text-slate-500 hover:text-dent-accent transition-colors text-[10px] font-black uppercase tracking-widest mb-4 group cursor-pointer"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            class="group-hover:-translate-x-1 transition-transform"
+            ><path d="m15 18-6-6 6-6"></path></svg
+          >
+          Volver al panel
+        </button>
+
+        <h1 class="text-4xl md:text-5xl font-black text-white italic uppercase tracking-tighter">
+          Historial <span class="text-dent-accent">Global</span>
+        </h1>
+        <p class="text-slate-500 font-medium mt-2 max-w-md">
+          Monitoreo total de archivos, clientes y estados de diseño en tiempo real.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4 relative z-10 w-full lg:w-auto">
+        <div class="relative flex-1 sm:flex-initial">
+          <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg
+            >
+          </div>
+          <input
+            type="text"
+            id="searchBox"
+            placeholder="BUSCAR CLIENTE O ARCHIVO..."
+            class="bg-dent-card border border-dent-border rounded-full pl-10 pr-6 py-3 text-[10px] font-black text-white outline-none focus:ring-2 focus:ring-dent-accent/50 focus:border-dent-accent transition-all placeholder:text-slate-600 w-full sm:w-[280px] uppercase tracking-widest"
+          />
+        </div>
+
+        <div class="relative w-full sm:w-auto">
+          <select
+            id="statusFilter"
+            class="appearance-none bg-dent-card border border-dent-border rounded-full px-6 py-3 text-[10px] font-black text-slate-200 uppercase outline-none cursor-pointer hover:border-dent-accent transition-all w-full sm:w-[180px] tracking-widest"
+          >
+            <option value="all" class="bg-slate-900 text-white">MOSTRAR: TODO</option>
+            <option value="pendiente" class="bg-slate-900 text-amber-500">PENDIENTES</option>
+            <option value="en_proceso" class="bg-slate-900 text-cyan-400">EN PROCESO</option>
+            <option value="completado" class="bg-slate-900 text-emerald-500">COMPLETADOS</option>
+          </select>
+          <div
+            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-dent-accent"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"><path d="m6 9 6 6 6-6"></path></svg
+            >
+          </div>
+        </div>
+
+        <button
+          id="downloadPDF"
+          class="bg-dent-accent hover:bg-cyan-500 hover:shadow-cyan-500/40 text-dent-dark px-8 py-3 rounded-full font-black text-[10px] tracking-widest transition-all shadow-xl shadow-cyan-500/10 flex items-center justify-center gap-2 uppercase group w-full sm:w-auto"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            class="group-hover:translate-y-0.5 transition-transform"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Exportar
+        </button>
+      </div>
+
+      <div
+        class="absolute -top-10 -left-10 w-40 h-40 bg-dent-accent/5 rounded-full blur-3xl pointer-events-none"
+      >
+      </div>
+    </header>
+
+    <div
+      class="bg-dent-card border border-dent-border rounded-[2.5rem] overflow-hidden shadow-2xl relative"
+    >
+      <div class="overflow-x-auto no-scrollbar">
+        <table class="w-full text-left border-collapse" id="historyTable">
+          <thead>
+            <tr class="bg-slate-950 border-b border-dent-border/50">
+              <th
+                class="p-6 text-[11px] font-black text-white uppercase tracking-[0.2em] opacity-90"
+                >Fecha</th
+              >
+              <th
+                class="p-6 text-[11px] font-black text-white uppercase tracking-[0.2em] opacity-90"
+                >Cliente</th
+              >
+              <th
+                class="p-6 text-[11px] font-black text-white uppercase tracking-[0.2em] opacity-90"
+                >Archivo</th
+              >
+              <th
+                class="p-6 text-[11px] font-black text-white uppercase tracking-[0.2em] text-center opacity-90"
+                >Estado</th
+              >
+              <th
+                class="p-6 text-[11px] font-black text-white uppercase tracking-[0.2em] text-right opacity-90"
+                >Gestión</th
+              >
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-dent-border/30">
+            {
+              historialCompleto.map((t) => (
+                <tr
+                  class="history-row hover:bg-white/[0.02] transition-colors group"
+                  data-status={t.estado}
+                  data-search={`${t.nombre_archivo} ${t.usuario.name}`.toLowerCase()}
+                >
+                  <td class="p-6">
+                    <span class="text-xs font-bold text-slate-400 font-mono">
+                      {new Date(t.fecha_subida).toLocaleDateString("es-ES")}
+                    </span>
+                  </td>
+                  <td class="p-6">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-lg bg-dent-accent/10 flex items-center justify-center border border-dent-accent/20 group-hover:scale-110 transition-transform">
+                        <span class="text-[10px] font-black text-dent-accent uppercase">
+                          {t.usuario.name.charAt(0)}
+                        </span>
+                      </div>
+                      <span class="text-xs font-black text-white uppercase tracking-tight group-hover:text-dent-accent transition-colors">
+                        {t.usuario.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="p-6">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 bg-dent-dark rounded-xl flex items-center justify-center border border-white/5 text-slate-500 group-hover:text-dent-accent group-hover:border-dent-accent/30 transition-all">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <>
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                            <polyline points="14 2 14 8 20 8" />
+                          </>
+                        </svg>
+                      </div>
+                      <span class="text-sm text-slate-200 font-bold group-hover:text-white transition-colors">
+                        {t.nombre_archivo}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="p-6 text-center">
+                    <span
+                      class={`inline-block px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                        t.estado === "urgente"
+                          ? "bg-red-500/10 text-red-500 border-red-500/20"
+                          : t.estado === "en_proceso"
+                            ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                            : t.estado === "completado"
+                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                              : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                      }`}
+                    >
+                      {t.estado.replace("_", " ")}
+                    </span>
+                  </td>
+                  <td class="p-6">
+                    <div class="flex justify-end items-center gap-2">
+                      <a
+                        href={`/api/downloads/${t.id_archivo}`}
+                        class="p-2.5 text-slate-500 hover:text-dent-accent hover:bg-dent-accent/10 rounded-xl transition-all"
+                        title="Descargar original"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                        >
+                          <>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </>
+                        </svg>
+                      </a>
+                      <a
+                        href={`/dashboard/admin/trabajo/${t.id_archivo}`}
+                        class="p-2.5 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                        title="Abrir Consola de Gestión"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                        >
+                          <>
+                            <circle cx="12" cy="12" r="3" />
+                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                          </>
+                        </svg>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+></script>
+<script
+  is:inline
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"
+></script>
+
+<script define:vars={{ historialCompleto }}>
+  const searchBox = document.getElementById("searchBox");
+  const statusFilter = document.getElementById("statusFilter");
+  const rows = document.querySelectorAll(".history-row");
+
+  function filterTable() {
+    const searchTerm = searchBox.value.toLowerCase();
+    const statusTerm = statusFilter.value;
+
+    rows.forEach((row) => {
+      const searchData = row.getAttribute("data-search");
+      const rowStatus = row.getAttribute("data-status");
+      const matchesSearch = searchData.includes(searchTerm);
+      const matchesStatus = statusTerm === "all" || rowStatus === statusTerm;
+      row.style.display = matchesSearch && matchesStatus ? "" : "none";
+    });
+  }
+
+  searchBox?.addEventListener("input", filterTable);
+  statusFilter?.addEventListener("change", filterTable);
+
+  // Lógica PDF Premium
+  document.getElementById("downloadPDF")?.addEventListener("click", () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Configuración estética del PDF para Admin
+    doc.setFillColor(2, 6, 23);
+    doc.rect(0, 0, 210, 40, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.setTextColor(6, 182, 212);
+    doc.text("DENTAL LAB ADMIN", 15, 25);
+    doc.setFontSize(9);
+    doc.setTextColor(150);
+    doc.text(`REPORTE DE SISTEMA - ${new Date().toLocaleString()}`, 15, 33);
+
+    // Obtener los datos de la tabla
+    const visibleRows = Array.from(rows).filter((r) => r.style.display !== "none");
+    const data = visibleRows.map((r) => {
+      const cells = r.querySelectorAll("td");
+
+      // Clonamos el contenido de la celda de cliente (índice 1) para no modificar la tabla real
+      const clientCell = cells[1].cloneNode(true);
+
+      // Eliminamos el div que contiene la inicial (el icono)
+      const iconDiv = clientCell.querySelector(".w-8.h-8");
+      if (iconDiv) iconDiv.remove();
+
+      return [
+        cells[0].innerText.trim(),
+        clientCell.innerText.trim(), // Aquí ya solo quedará el nombre
+        cells[2].innerText.trim(),
+        cells[3].innerText.trim(),
+      ];
+    });
+
+    doc.autoTable({
+      startY: 50,
+      head: [["FECHA", "CLIENTE", "ARCHIVO", "ESTADO"]],
+      body: data,
+      theme: "grid",
+      headStyles: { fillColor: [6, 182, 212], textColor: [2, 6, 23] },
+    });
+
+    doc.save(`Historial_DentalLab_${Date.now()}.pdf`);
+  });
+</script>

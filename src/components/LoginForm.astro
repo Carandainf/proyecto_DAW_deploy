@@ -1,0 +1,154 @@
+---
+/**
+ * @file LoginForm.astro
+ * @description Formulario de inicio de sesión optimizado para el portal profesional.
+ * Gestiona el flujo de autenticación y redirige dinámicamente según el rol (Admin/Cliente).
+ */
+---
+
+<div class="w-full">
+  <form id="loginForm" class="space-y-5">
+    <div class="group">
+      <label
+        class="block text-[10px] uppercase font-black text-slate-400 mb-2 ml-1 tracking-[0.2em] group-focus-within:text-dent-accent transition-colors"
+      >
+        Email Profesional
+      </label>
+      <input
+        name="email"
+        type="email"
+        placeholder="ejemplo@clinica.com"
+        class="w-full bg-slate-50 border border-slate-200 text-slate-900 p-4 rounded-2xl outline-none focus:border-dent-accent focus:ring-4 focus:ring-dent-accent/5 transition-all placeholder:text-slate-300 font-medium"
+        required
+      />
+    </div>
+
+    <div class="group">
+      <div class="flex flex-wrap justify-between items-end gap-2 mb-2 px-1">
+        <label
+          class="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] group-focus-within:text-dent-accent transition-colors"
+        >
+          Contraseña
+        </label>
+        <a
+          href="/forgot-password"
+          class="text-[9px] uppercase font-bold text-slate-400 hover:text-dent-accent transition-colors tracking-widest border-b border-transparent hover:border-dent-accent/30"
+        >
+          ¿Olvidaste tu clave?
+        </a>
+      </div>
+      <input
+        name="password"
+        type="password"
+        placeholder="••••••••"
+        class="w-full bg-slate-50 border border-slate-200 text-slate-900 p-4 rounded-2xl outline-none focus:border-dent-accent focus:ring-4 focus:ring-dent-accent/5 transition-all placeholder:text-slate-300 font-medium"
+        required
+      />
+    </div>
+
+    <button
+      type="submit"
+      id="loginBtn"
+      class="group w-full bg-dent-dark text-white font-black py-4 rounded-2xl uppercase text-xs tracking-[0.3em] shadow-xl shadow-slate-900/10 hover:bg-slate-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+    >
+      <span>Entrar al Portal</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="group-hover:translate-x-1 transition-transform"
+        ><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline
+          points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg
+      >
+    </button>
+
+    <div
+      id="loginError"
+      class="hidden p-3 rounded-xl bg-red-50 border border-red-100 text-red-500 text-[10px] font-black text-center mt-4 uppercase tracking-widest animate-shake"
+    >
+      Credenciales incorrectas
+    </div>
+  </form>
+</div>
+
+<script>
+  /**
+   * @description Procesa el inicio de sesión.
+   * 1. Autentica contra Better-Auth.
+   * 2. Recupera la sesión para verificar el rol del usuario.
+   * 3. Redirige a la ruta correspondiente del dashboard.
+   */
+  // ... lógica de login y redirección por rol ...
+  const loginForm = document.getElementById("loginForm") as HTMLFormElement | null;
+  const loginError = document.getElementById("loginError");
+  const loginBtn = document.getElementById("loginBtn") as HTMLButtonElement;
+
+  loginForm?.addEventListener("submit", async (e: SubmitEvent) => {
+    e.preventDefault();
+    if (loginError) loginError.classList.add("hidden");
+
+    const originalContent = loginBtn.innerHTML;
+    loginBtn.innerHTML = `<span class="animate-pulse">VERIFICANDO...</span>`;
+    loginBtn.disabled = true;
+
+    const fd = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(fd);
+
+    try {
+      const loginRes = await fetch("/api/auth/sign-in/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+
+      if (!loginRes.ok) throw new Error("Login fallido");
+
+      const res = await fetch("/api/auth/get-session", { credentials: "include" });
+      const session = await res.json();
+
+      if (session?.user) {
+        const targetPath =
+          session.user.role === "admin" ? "/dashboard/admin" : "/dashboard/cliente";
+        window.location.href = targetPath;
+      } else {
+        throw new Error("No se pudo recuperar la sesión");
+      }
+    } catch (err) {
+      if (loginError) loginError.classList.remove("hidden");
+      loginBtn.innerHTML = originalContent;
+      loginBtn.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  .animate-shake {
+    animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+  @keyframes shake {
+    10%,
+    90% {
+      transform: translate3d(-1px, 0, 0);
+    }
+    20%,
+    80% {
+      transform: translate3d(2px, 0, 0);
+    }
+    30%,
+    50%,
+    70% {
+      transform: translate3d(-4px, 0, 0);
+    }
+    40%,
+    60% {
+      transform: translate3d(4px, 0, 0);
+    }
+  }
+</style>

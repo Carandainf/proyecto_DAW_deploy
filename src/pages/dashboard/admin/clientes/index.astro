@@ -1,0 +1,391 @@
+---
+/**
+ * @file index.astro
+ * @description Panel de gestión de clientes para administradores.
+ * Permite listar, buscar, editar y dar de baja a usuarios con rol 'user'.
+ * * @requires prisma - Cliente de base de datos para consultas.
+ * @requires protectRoute - Utilidad de control de acceso.
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import { prisma } from "@/lib/prisma";
+import { protectRoute } from "@/lib/auth";
+
+/** * Verificación de sesión y rol de administrador.
+ * @type {Object} user - Datos del administrador autenticado.
+ */
+const { user } = await protectRoute(Astro.request, "admin");
+
+/**
+ * Obtención de la lista de clientes activos.
+ * Se excluyen usuarios marcados como 'banned' (borrado lógico).
+ * @type {Array<Object>} clientes - Lista de usuarios con conteo de archivos relacionados.
+ */
+const clientes = await prisma.user.findMany({
+  where: {
+    role: "user",
+    NOT: { banned: true },
+  },
+  include: {
+    _count: {
+      select: { archivos: true },
+    },
+  },
+  orderBy: { name: "asc" },
+});
+---
+
+<Layout title="Gestión de Clientes | Admin" darkMode={true}>
+  <main
+    class="min-h-screen pt-28 md:pt-36 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto transition-all animate-fade-in"
+  >
+    <nav class="mb-8">
+      <a
+        href="/dashboard/admin"
+        class="inline-flex items-center gap-2 text-slate-500 hover:text-dent-accent text-[10px] font-black uppercase tracking-[0.2em] transition-all group"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="group-hover:-translate-x-1 transition-transform"
+          ><path d="m15 18-6-6 6-6"></path></svg
+        >
+        Volver al Dashboard
+      </a>
+    </nav>
+
+    <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <h1 class="text-5xl font-black italic tracking-tighter text-white leading-none">
+          Base de <span class="text-dent-accent">Clientes</span>
+        </h1>
+        <p
+          class="text-slate-500 text-[10px] uppercase tracking-[0.4em] mt-3 ml-1 font-bold opacity-70"
+        >
+          Directorio central de doctores y clínicas registradas
+        </p>
+      </div>
+
+      <a
+        href="/dashboard/admin/clientes/nuevo"
+        class="bg-dent-accent text-dent-dark font-black py-4 px-8 rounded-2xl text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-dent-accent/20 flex items-center justify-center gap-3 group"
+      >
+        <div class="bg-dent-dark/10 p-1 rounded-md group-hover:bg-dent-dark/20 transition-colors">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"><path d="M5 12h14m-7-7v14"></path></svg
+          >
+        </div>
+        Registrar Nuevo
+      </a>
+    </header>
+
+    <section class="mb-10 relative group">
+      <div
+        class="absolute inset-y-0 left-6 flex items-center pointer-events-none text-slate-500 group-focus-within:text-dent-accent transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg
+        >
+      </div>
+      <input
+        type="text"
+        id="clienteSearch"
+        placeholder="Buscar por nombre, clínica o email..."
+        class="w-full bg-dent-card/50 backdrop-blur-sm border border-dent-border rounded-[2rem] py-6 pl-16 pr-8 text-white focus:outline-none focus:border-dent-accent/50 focus:ring-8 focus:ring-dent-accent/5 transition-all shadow-2xl placeholder:text-slate-700 placeholder:uppercase placeholder:text-[10px] placeholder:tracking-[0.2em] font-medium"
+      />
+    </section>
+
+    <div class="grid gap-5" id="clientesList">
+      {
+        clientes.map((cliente) => (
+          <article
+            class="cliente-card bg-dent-card border border-dent-border p-6 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 hover:border-dent-accent/40 transition-all shadow-sm hover:shadow-dent-accent/5 group relative overflow-hidden"
+            data-name={cliente.name.toLowerCase()}
+            data-email={cliente.email.toLowerCase()}
+          >
+            <div class="absolute -right-4 -bottom-4 text-slate-900/10 pointer-events-none group-hover:text-dent-accent/5 transition-colors">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="120"
+                height="120"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <>
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </>
+              </svg>
+            </div>
+
+            <div class="flex items-center gap-6 w-full md:w-auto relative z-10">
+              <div class="w-16 h-16 rounded-[1.25rem] bg-slate-900 flex items-center justify-center text-dent-accent font-black text-xl border border-white/5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                {cliente.name.substring(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <h3 class="text-white font-black uppercase tracking-tight text-xl leading-none mb-1">
+                  {cliente.name}
+                </h3>
+                <p class="text-dent-accent/50 text-[11px] font-mono font-bold uppercase tracking-wider">
+                  {cliente.email}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-5 md:pt-0 relative z-10">
+              <div class="text-center md:text-right">
+                <span class="block text-3xl font-black text-white italic leading-none tracking-tighter">
+                  {cliente._count.archivos}
+                </span>
+                <span class="text-[9px] uppercase text-slate-500 font-black tracking-[0.2em]">
+                  Trabajos
+                </span>
+              </div>
+
+              <div class="flex gap-3">
+                <a
+                  href={`/dashboard/admin/clientes/editar/${cliente.id}`}
+                  class="p-4 bg-slate-900/50 text-slate-400 rounded-2xl hover:bg-dent-accent hover:text-dent-dark transition-all border border-white/5 hover:border-dent-accent/20"
+                  title="Editar Perfil"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <>
+                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                      <path d="m15 5 4 4" />
+                    </>
+                  </svg>
+                </a>
+                <button
+                  class="btn-baja p-4 bg-slate-900/50 text-red-500/40 rounded-2xl hover:bg-red-500 hover:text-white transition-all border border-white/5 hover:border-red-500/20 cursor-pointer"
+                  data-id={cliente.id}
+                  data-name={cliente.name}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5 4 4m0-4-4 4" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </main>
+
+  <aside
+    id="modal-delete"
+    class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-fade-in"
+  >
+    <div
+      class="bg-dent-card border border-red-500/20 w-full max-w-md rounded-[3rem] p-10 shadow-2xl transition-all border-b-8 border-b-red-500/50"
+    >
+      <div class="text-center">
+        <div
+          class="w-20 h-20 bg-red-500/10 text-red-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-8 border border-red-500/20 animate-pulse"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="36"
+            height="36"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path
+              d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5 4 4m0-4-4 4"
+            ></path></svg
+          >
+        </div>
+        <h3 class="text-2xl font-black text-white italic uppercase tracking-tighter mb-3">
+          ¿Dar de baja?
+        </h3>
+        <p class="text-slate-400 text-sm mb-10 leading-relaxed">
+          Vas a restringir el acceso a <br />
+          <span id="delete-client-name" class="text-white font-bold italic text-lg tracking-tight"
+          ></span>
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <button
+          id="confirm-delete-btn"
+          class="w-full bg-red-500 text-white font-black py-5 rounded-2xl uppercase text-[11px] tracking-[0.2em] hover:bg-red-600 active:scale-95 transition-all shadow-lg shadow-red-500/20 cursor-pointer"
+        >
+          Confirmar Suspensión
+        </button>
+        <button
+          id="close-delete-modal"
+          class="w-full bg-slate-900 text-slate-500 font-black py-5 rounded-2xl uppercase text-[10px] tracking-[0.2em] hover:text-white hover:bg-slate-800 transition-all cursor-pointer"
+        >
+          Volver atrás
+        </button>
+      </div>
+    </div>
+  </aside>
+</Layout>
+
+<script>
+  /**
+   * @module ClientesDashboard
+   * @description Lógica del lado del cliente para búsqueda y gestión de bajas.
+   */
+
+  /** @type {HTMLInputElement} */
+  const searchInput = document.getElementById("clienteSearch") as HTMLInputElement;
+  /** @type {NodeListOf<HTMLElement>} */
+  const cards = document.querySelectorAll(".cliente-card");
+
+  /**
+   * Filtra las tarjetas de clientes en base al valor del input.
+   * Busca coincidencias en nombre y email.
+   */
+  searchInput?.addEventListener("input", () => {
+    const val = searchInput.value.toLowerCase();
+    cards.forEach((card: any) => {
+      const name = card.dataset.name || "";
+      const email = card.dataset.email || "";
+      const isVisible = name.includes(val) || email.includes(val);
+
+      card.style.display = isVisible ? "flex" : "none";
+      if (isVisible) card.classList.add("animate-fade-in");
+    });
+  });
+
+  // --- Lógica del Modal ---
+  const modalDelete = document.getElementById("modal-delete");
+  const confirmBtn = document.getElementById("confirm-delete-btn") as HTMLButtonElement;
+  const cancelBtn = document.getElementById("close-delete-modal");
+  const nameSpan = document.getElementById("delete-client-name");
+  let clientIdToDelete: string | null = null;
+
+  /**
+   * Abre el modal de confirmación y prepara el ID del cliente.
+   * @param {Event} e - Evento de click.
+   */
+  document.querySelectorAll(".btn-baja").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = btn as HTMLElement;
+      clientIdToDelete = target.getAttribute("data-id");
+
+      if (nameSpan) {
+        nameSpan.innerText = target.getAttribute("data-name") || "este cliente";
+      }
+
+      modalDelete?.classList.replace("hidden", "flex");
+      document.body.style.overflow = "hidden"; // Bloquea scroll
+    });
+  });
+
+  /**
+   * Cierra el modal y restablece el estado.
+   */
+  const closeModal = () => {
+    modalDelete?.classList.replace("flex", "hidden");
+    document.body.style.overflow = "auto";
+  };
+
+  cancelBtn?.addEventListener("click", closeModal);
+
+  /**
+   * Procesa la baja del cliente mediante una petición POST al API.
+   * @async
+   */
+  confirmBtn?.addEventListener("click", async () => {
+    if (!clientIdToDelete) return;
+
+    confirmBtn.innerText = "PROCESANDO SOLICITUD...";
+    confirmBtn.disabled = true;
+    confirmBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+    try {
+      const res = await fetch(`/api/admin/clientes/baja`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: clientIdToDelete }),
+      });
+
+      if (res.ok) {
+        // Recarga para reflejar cambios
+        location.reload();
+      } else {
+        throw new Error("Error en la respuesta del servidor");
+      }
+    } catch (err) {
+      console.error("[Baja Cliente Error]:", err);
+      confirmBtn.innerText = "ERROR EN EL SISTEMA";
+      confirmBtn.classList.replace("bg-red-500", "bg-orange-600");
+
+      setTimeout(() => {
+        confirmBtn.innerText = "Confirmar Suspensión";
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        confirmBtn.classList.replace("bg-orange-600", "bg-red-500");
+      }, 3000);
+    }
+  });
+</script>
+
+<style>
+  /** Animación de entrada para elementos */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+</style>

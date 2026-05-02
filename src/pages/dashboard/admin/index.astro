@@ -1,0 +1,580 @@
+---
+// src/pages/dashboard/admin/index.astro
+import Layout from "@/layouts/Layout.astro";
+import { protectRoute } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+// 1. Protección de ruta (Solo Admins)
+const { shouldRedirect, url, user } = await protectRoute(Astro.request, "admin");
+if (shouldRedirect) return Astro.redirect(url);
+
+// 2. Consultas de Administración
+const contactosPendientes = await prisma.contacto.findMany({
+  where: { leido: false },
+  orderBy: { id_contacto: "desc" },
+});
+
+const trabajosActivos = await prisma.archivo.findMany({
+  where: {
+    estado: { in: ["pendiente", "en_proceso"] },
+  },
+  include: { usuario: true },
+  orderBy: [{ prioridad: "desc" }, { fecha_subida: "asc" }],
+});
+
+const enCurso = trabajosActivos.filter((t) => t.estado === "en_proceso");
+const urgentes = trabajosActivos.filter(
+  (t) => t.prioridad === "urgente" && t.estado === "pendiente"
+);
+const normales = trabajosActivos.filter(
+  (t) => t.prioridad !== "urgente" && t.estado === "pendiente"
+);
+
+// --- MENSAJES AGRUPADOS ---
+const trabajosConMensajes = await prisma.archivo.findMany({
+  where: {
+    mensajes: { some: {} },
+  },
+  include: {
+    usuario: true,
+    mensajes: {
+      orderBy: { fecha_envio: "desc" },
+      take: 1,
+      include: { emisor: true },
+    },
+  },
+  take: 6,
+});
+
+const actividadAgrupada = trabajosConMensajes.sort((a, b) => {
+  const fechaA = a.mensajes[0]?.fecha_envio.getTime() || 0;
+  const fechaB = b.mensajes[0]?.fecha_envio.getTime() || 0;
+  return fechaB - fechaA;
+});
+
+const totalTrabajosActivos = trabajosActivos.length;
+---
+
+<Layout title="Panel de Control Admin" darkMode={true}>
+  <main
+    class="min-h-screen pt-28 md:pt-36 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto transition-all"
+  >
+    <header class="mb-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div>
+        <h1 class="text-4xl font-black italic tracking-tighter text-white">
+          Admin <span class="text-dent-accent">Console</span>
+        </h1>
+        <p class="text-slate-500 text-xs uppercase tracking-[0.3em] mt-1 ml-1 font-bold">
+          Gestión centralizada del laboratorio
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <a
+          href="/dashboard/admin/clientes"
+          class="btn-secondary !text-dent-accent !border-dent-accent/30 hover:!bg-dent-accent/10 px-5 py-3"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span class="text-xs font-black uppercase tracking-widest">Gestión Clientes</span>
+        </a>
+
+        <a href="/dashboard/admin/historial" class="btn-secondary px-5 py-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-xs font-black uppercase tracking-widest">Historial</span>
+        </a>
+
+        <a
+          href="/dashboard/admin/contactos-historial"
+          class="btn-secondary !text-amber-500 !border-amber-500/30 hover:!bg-amber-500/10 px-5 py-3"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M21 8V21H3V8"></path>
+            <path d="M1 3H23V8H1V3Z"></path>
+            <path d="M10 12H14"></path>
+          </svg>
+          <span class="text-xs font-black uppercase tracking-widest">Archivo Mensajes</span>
+        </a>
+
+        <div
+          class="bg-dent-card border border-dent-border px-6 py-2 rounded-2xl shadow-xl border-l-4 border-l-dent-accent"
+        >
+          <p class="text-[9px] uppercase tracking-[0.2em] text-slate-500 font-bold">Cola Global</p>
+          <p class="text-xl font-black text-white">
+            {totalTrabajosActivos}
+            <span class="text-[10px] text-dent-accent font-bold italic">ITEMS</span>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section
+        class={`bg-dent-card border-2 rounded-3xl p-6 shadow-xl transition-all ${contactosPendientes.length > 0 ? "border-amber-500/50 shadow-amber-900/10" : "border-dent-border"}`}
+      >
+        <div class="flex justify-between items-center mb-6">
+          <h2
+            class="font-bold flex items-center gap-2 uppercase tracking-tighter text-sm text-slate-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5 text-amber-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M22 17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.5C2 7 4 5 6.5 5H18c2.2 0 4 1.8 4 4v1.5"
+              ></path>
+              <polyline points="15 7 10 12 5 7"></polyline>
+            </svg>
+            Contactos Web
+          </h2>
+          {
+            contactosPendientes.length > 0 && (
+              <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+              </span>
+            )
+          }
+        </div>
+
+        <div class="space-y-4 max-h-100 overflow-y-auto pr-2 custom-scrollbar">
+          {
+            contactosPendientes.length === 0 ? (
+              <p class="text-center py-10 text-slate-500 text-xs italic">
+                No hay consultas pendientes.
+              </p>
+            ) : (
+              contactosPendientes.map((c) => (
+                <div
+                  data-id-contacto={c.id_contacto}
+                  data-email={c.email}
+                  class="contacto-card bg-dent-bg border border-dent-border p-3 rounded-2xl group hover:border-amber-500/30 transition-all cursor-pointer"
+                >
+                  <div class="flex justify-between text-[10px] mb-1">
+                    <span class="font-bold text-dent-accent uppercase tracking-tighter">
+                      {c.nombre}
+                    </span>
+                    <span class="text-slate-500 font-mono italic">Pendiente</span>
+                  </div>
+                  <p class="text-xs font-bold text-slate-200 mb-1">{c.asunto}</p>
+                  <p class="text-xs text-slate-400 line-clamp-2 italic">"{c.mensaje}"</p>
+                </div>
+              ))
+            )
+          }
+        </div>
+        <div class="mt-6 pt-4 border-t border-dent-border/50">
+          <a
+            href="/dashboard/admin/contactos-historial"
+            class="flex items-center justify-center gap-2 text-[10px] font-black text-slate-500 hover:text-amber-500 transition-colors uppercase tracking-[0.2em] group"
+          >
+            Ver mensajes archivados
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              class="group-hover:translate-x-1 transition-transform"
+            >
+              <path d="M5 12h14m-7-7 7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </section>
+
+      <section
+        class="md:col-span-2 bg-dent-card border border-dent-border rounded-3xl p-6 shadow-xl"
+      >
+        <h2
+          class="text-xl font-bold mb-6 flex items-center gap-2 uppercase tracking-tighter text-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5 text-dent-accent"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          Cola de <span class="text-dent-accent italic">Trabajos</span>
+        </h2>
+
+        <div class="space-y-8 max-h-125 overflow-y-auto pr-2 custom-scrollbar">
+          {
+            urgentes.length > 0 && (
+              <div>
+                <p class="text-[10px] uppercase tracking-[0.2em] text-red-500 font-black mb-3 flex items-center gap-2">
+                  <span class="flex h-2 w-2 rounded-full bg-red-500 animate-pulse" /> Prioridad
+                  Máxima
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {urgentes.map((t) => (
+                    <a
+                      href={`/dashboard/admin/trabajo/${t.id_archivo}`}
+                      class="flex items-center gap-4 p-3 bg-red-500/5 border border-red-500/20 rounded-2xl hover:bg-red-500/10 transition-all group shadow-lg shadow-red-900/5"
+                    >
+                      <div class="p-2 bg-red-500/20 rounded-xl text-red-500">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-5 h-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-bold truncate text-white">{t.nombre_archivo}</p>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase">
+                          {t.usuario.name}
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )
+          }
+
+          <div>
+            <p
+              class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black mb-3 flex items-center gap-2"
+            >
+              <span class="flex h-2 w-2 rounded-full bg-slate-500"></span> Estándar
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {
+                normales.length === 0 && urgentes.length === 0 ? (
+                  <p class="col-span-2 text-center py-10 text-slate-500 italic text-sm border border-dashed border-dent-border rounded-2xl">
+                    Todo al día.
+                  </p>
+                ) : (
+                  normales.map((t) => (
+                    <a
+                      href={`/dashboard/admin/trabajo/${t.id_archivo}`}
+                      class="flex items-center gap-4 p-3 bg-dent-bg border border-dent-border rounded-2xl hover:border-dent-accent/50 transition-all group"
+                    >
+                      <div class="p-2 bg-slate-800 rounded-xl text-slate-400 group-hover:text-dent-accent transition-colors">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-5 h-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                        </svg>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold truncate text-slate-200">
+                          {t.nombre_archivo}
+                        </p>
+                        <p class="text-[9px] text-slate-500 font-bold uppercase">
+                          {t.usuario.name}
+                        </p>
+                      </div>
+                    </a>
+                  ))
+                )
+              }
+            </div>
+          </div>
+
+          <div class="mt-8 border-t border-dent-border pt-6">
+            <p
+              class="text-[10px] uppercase tracking-[0.2em] text-dent-accent font-black mb-3 flex items-center gap-2"
+            >
+              <span
+                class="w-2 h-2 bg-dent-accent rounded-full shadow-[0_0_8px_rgba(14,165,233,0.5)]"
+              ></span> En Fabricación / Proceso
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {
+                enCurso.length === 0 ? (
+                  <p class="col-span-2 text-center py-6 text-slate-600 text-xs italic">
+                    No hay trabajos en el horno.
+                  </p>
+                ) : (
+                  enCurso.map((t) => (
+                    <a
+                      href={`/dashboard/admin/trabajo/${t.id_archivo}`}
+                      class="flex items-center gap-4 p-3 bg-dent-accent/5 border border-dent-accent/20 rounded-2xl hover:bg-dent-accent/10 transition-all group"
+                    >
+                      <div class="p-2 bg-dent-accent/20 rounded-xl text-dent-accent animate-pulse">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-5 h-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" />
+                        </svg>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-bold truncate text-slate-100">{t.nombre_archivo}</p>
+                        <p class="text-[9px] text-dent-accent font-bold uppercase">
+                          {t.usuario.name}
+                        </p>
+                      </div>
+                    </a>
+                  ))
+                )
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="md:col-span-3 bg-dent-card border border-dent-border rounded-3xl p-6 shadow-xl"
+      >
+        <div class="flex justify-between items-center mb-6">
+          <h2
+            class="text-md font-bold text-white flex items-center gap-2 uppercase tracking-widest"
+          >
+            <span class="w-2 h-2 bg-dent-accent rounded-full animate-pulse"></span>
+            Bandeja de <span class="text-dent-accent italic">Mensajes por Cliente</span>
+          </h2>
+          <a
+            href="/dashboard/admin/conversaciones"
+            class="text-[10px] font-black text-slate-500 hover:text-dent-accent transition-all uppercase tracking-widest flex items-center gap-2 group"
+          >
+            Ver todas las conversaciones
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              class="group-hover:translate-x-1 transition-transform"
+              ><path d="m9 18 6-6-6-6"></path></svg
+            >
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {
+            actividadAgrupada.length === 0 ? (
+              <div class="col-span-full py-12 text-center border border-dashed border-dent-border rounded-2xl">
+                <p class="text-slate-500 text-sm italic">
+                  No hay conversaciones activas actualmente.
+                </p>
+              </div>
+            ) : (
+              actividadAgrupada.map((t) => (
+                <a
+                  href={`/dashboard/admin/trabajo/${t.id_archivo}`}
+                  class="group p-4 bg-dent-bg border border-dent-border hover:border-dent-accent/40 rounded-2xl transition-all flex flex-col justify-between shadow-lg hover:shadow-dent-accent/5"
+                >
+                  <div>
+                    <div class="flex justify-between items-start mb-3">
+                      <div class="flex items-center gap-2 overflow-hidden">
+                        <div class="w-8 h-8 rounded-lg bg-dent-accent/10 flex-shrink-0 flex items-center justify-center text-dent-accent font-bold text-xs border border-dent-accent/20">
+                          {t.usuario.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-[10px] font-black text-white uppercase truncate">
+                            {t.usuario.name}
+                          </p>
+                          <p class="text-[9px] text-dent-accent font-medium truncate italic">
+                            {t.nombre_archivo}
+                          </p>
+                        </div>
+                      </div>
+                      <span class="text-[9px] text-slate-500 font-mono bg-slate-900 px-2 py-1 rounded border border-white/5 flex-shrink-0">
+                        {new Date(t.mensajes[0].fecha_envio).toLocaleDateString([], {
+                          day: "2-digit",
+                          month: "2-digit",
+                        })}
+                      </span>
+                    </div>
+
+                    <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5 group-hover:border-dent-accent/20 transition-colors">
+                      <p class="text-xs italic text-slate-300 line-clamp-2 leading-relaxed">
+                        "{t.mensajes[0].contenido}"
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
+                    <span class="text-[9px] text-slate-500 uppercase font-bold tracking-tighter">
+                      Última actividad:{" "}
+                      <span class="text-slate-300">{t.mensajes[0].emisor.name.split(" ")[0]}</span>
+                    </span>
+                    <div class="flex items-center gap-1 text-dent-accent text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                      RESPONDER
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      >
+                        <path d="m9 18 6-6-6-6" />
+                      </svg>
+                    </div>
+                  </div>
+                </a>
+              ))
+            )
+          }
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div
+    id="modal-contacto"
+    class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+  >
+    <div
+      class="bg-dent-card border border-dent-border w-full max-w-lg rounded-3xl p-6 shadow-2xl scale-95 transition-all"
+    >
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h3 id="modal-nombre" class="text-xl font-bold text-dent-accent"></h3>
+          <p id="modal-email" class="text-xs text-slate-500 font-mono"></p>
+        </div>
+        <button id="close-modal" class="text-slate-500 hover:text-white cursor-pointer">✕</button>
+      </div>
+      <div class="bg-dent-bg p-4 rounded-2xl mb-6 border border-dent-border">
+        <p class="text-[10px] uppercase text-slate-500 font-bold mb-1">Mensaje original:</p>
+        <p id="modal-mensaje" class="text-sm italic text-slate-300"></p>
+      </div>
+
+      <form id="form-respuesta">
+        <input type="hidden" id="modal-id" name="id_contacto" />
+        <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Tu respuesta:</label>
+
+        <textarea
+          name="respuesta"
+          required
+          rows="5"
+          class="dent-input resize-none"
+          placeholder="Escribe aquí la respuesta..."></textarea>
+
+        <div class="flex flex-col sm:flex-row gap-3 mt-6">
+          <button type="submit" class="btn-primary flex-2"> Enviar y Archivar </button>
+          <button type="button" id="btn-solo-archivar" class="btn-secondary flex-1">
+            Solo Archivar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // script para el modal de contacto
+  const modal = document.getElementById("modal-contacto");
+  const formRespuesta = document.getElementById("form-respuesta") as HTMLFormElement;
+  const btnArchivar = document.getElementById("btn-solo-archivar");
+
+  btnArchivar?.addEventListener("click", async () => {
+    const id = (document.getElementById("modal-id") as HTMLInputElement).value;
+    if (!id) return; // si no hay id, no se puede archivar
+    btnArchivar.textContent = "Archivando...";
+    btnArchivar.classList.add("pointer-events-none", "opacity-50");
+    try {
+      const response = await fetch("/api/admin/contacto-read", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_contacto: id }),
+      });
+      if (response.ok) location.reload();
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  document.querySelectorAll(".contacto-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const id = card.getAttribute("data-id-contacto");
+      const nombre = card.querySelector(".font-bold.text-dent-accent")?.textContent;
+      const mensaje = card.querySelector(".italic")?.textContent;
+      const email = card.getAttribute("data-email");
+
+      (document.getElementById("modal-id") as HTMLInputElement).value = id!;
+      document.getElementById("modal-nombre")!.textContent = nombre!;
+      document.getElementById("modal-mensaje")!.textContent = mensaje!;
+      document.getElementById("modal-email")!.textContent = email!;
+
+      modal?.classList.replace("hidden", "flex");
+    });
+  });
+
+  document.getElementById("close-modal")?.addEventListener("click", () => {
+    modal?.classList.replace("flex", "hidden");
+  });
+
+  formRespuesta?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(formRespuesta);
+    const btn = formRespuesta.querySelector("button[type='submit']") as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = "Enviando...";
+    try {
+      const response = await fetch("/api/admin/contacto-responder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(formData)),
+      });
+      if (response.ok) location.reload();
+    } catch (err) {
+      console.error(err);
+    }
+  });
+</script>
