@@ -105,13 +105,25 @@ export async function getUserRole(request: Request) {
  * @returns Objeto con instrucciones de redirección si no cumple los requisitos.
  */
 export async function protectRoute(request: Request, requiredRole?: string) {
+  // 1. Obtener la URL actual para ver dónde estamos
+  const url = new URL(request.url);
+  const path = url.pathname;
+
+  // 2. LISTA BLANCA: Páginas que NO deben pasar por el filtro de protección
+  // Añade aquí todas las rutas que no necesiten login
+  const publicRoutes = ["/", "/legal/privacidad", "/legal/cookies", "/contacto"];
+
+  if (publicRoutes.includes(path)) {
+    return { shouldRedirect: false, user: null, role: null };
+  }
+
+  // 3. Protección normal para el resto
   const { loggedIn, role, user } = await getUserRole(request);
 
   if (!loggedIn) {
     return { shouldRedirect: true, url: "/", user: null };
   }
 
-  // Si requiere un rol específico y el usuario no lo tiene, redirigir a su dashboard correspondiente
   if (requiredRole && role !== requiredRole) {
     const fallback = role === "admin" ? "/dashboard/admin" : "/dashboard/cliente";
     return { shouldRedirect: true, url: fallback, user };
