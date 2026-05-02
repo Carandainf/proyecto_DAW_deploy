@@ -2,9 +2,10 @@
   "name": "proyecto-daw",
   "type": "module",
   "version": "0.0.1",
-  "scripts": {
+ "scripts": {
   "dev": "astro dev",
-  "build": "prisma generate && astro build",
+  "build": "npm install && npx prisma generate && astro build",
+  "postinstall": "npx prisma generate",
   "preview": "astro preview",
   "astro": "astro"
 },
