@@ -57,7 +57,7 @@ if (!trabajo || (trabajo.id_usuario !== user.id && user.role !== "admin")) {
     </div>
 
     <section
-      class="bg-dent-card rounded-[2rem] border border-dent-border p-8 mb-8 relative overflow-hidden shadow-2xl"
+      class="bg-dent-card rounded-4xl border border-dent-border p-8 mb-8 relative overflow-hidden shadow-2xl"
     >
       <div
         class="absolute -top-20 -right-20 w-64 h-64 bg-dent-accent/5 rounded-full blur-[80px] pointer-events-none"
@@ -66,7 +66,7 @@ if (!trabajo || (trabajo.id_usuario !== user.id && user.role !== "admin")) {
       <div
         class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10"
       >
-        <div>
+        <div class="min-w-0 flex-1">
           <div class="flex items-center gap-3 mb-2">
             <span
               class="text-[9px] font-black text-slate-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded"
@@ -78,7 +78,7 @@ if (!trabajo || (trabajo.id_usuario !== user.id && user.role !== "admin")) {
             >
           </div>
           <h1
-            class="text-3xl md:text-4xl font-black text-white italic uppercase tracking-tighter leading-none"
+            class="text-3xl md:text-4xl font-black text-white italic uppercase tracking-tighter leading-tight break-all"
           >
             {trabajo.nombre_archivo}
           </h1>
@@ -92,7 +92,7 @@ if (!trabajo || (trabajo.id_usuario !== user.id && user.role !== "admin")) {
             }
           </p>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 shrink-0">
           <a
             href={`/api/downloads/${trabajo.id_archivo}`}
             class="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-black text-white uppercase tracking-widest transition-all"
@@ -121,7 +121,7 @@ if (!trabajo || (trabajo.id_usuario !== user.id && user.role !== "admin")) {
     </section>
 
     <section
-      class="bg-dent-card rounded-[2rem] border border-dent-border flex flex-col h-[600px] overflow-hidden shadow-2xl relative"
+      class="bg-dent-card rounded-4xl border border-dent-border flex flex-col h-150 overflow-hidden shadow-2xl relative"
     >
       <div
         class="px-8 py-5 border-b border-dent-border bg-dent-dark/30 flex items-center justify-between"
@@ -139,7 +139,7 @@ if (!trabajo || (trabajo.id_usuario !== user.id && user.role !== "admin")) {
 
       <div
         id="chat-box"
-        class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-gradient-to-b from-transparent to-dent-dark/10"
+        class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-linear-to-b from-transparent to-dent-dark/10"
       >
         {
           trabajo.mensajes.length === 0 ? (
