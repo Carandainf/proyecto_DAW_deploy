@@ -40,15 +40,23 @@ export const GET: APIRoute = async ({ params, request }) => {
       throw new Error("CLOUDINARY_ERROR");
     }
 
-    return new Response(responseCloudinary.body, {
+    // --- CAMBIO AQUÍ: Buffer en lugar de streaming directo ---
+    const arrayBuffer = await responseCloudinary.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    // ---------------------------------------------------------
+
+    return new Response(buffer, {
       status: 200,
       headers: {
         "Content-Type": "application/octet-stream",
         "Content-Disposition": `attachment; filename="${archivo.nombre_archivo}"`,
-        "Content-Length": responseCloudinary.headers.get("Content-Length") || "",
+        "Content-Length": buffer.length.toString(),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
+    // Registramos el error real en Vercel por si necesitamos depurar
+    console.error("DEBUG_ERROR_DOWNLOAD:", error.message);
+
     // Mantenemos tu HTML de error personalizado para que el usuario no vea un JSON feo
     const htmlError = `
       <!DOCTYPE html>
