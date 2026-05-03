@@ -56,15 +56,17 @@ export const GET: APIRoute = async ({ params, request }) => {
       finalUrl = `https://${finalUrl}`;
     }
 
-    const safeUrl = new URL(finalUrl).href;
+    let safeUrl = new URL(finalUrl);
 
-    console.log("REDIRECT TO:", safeUrl);
+    // fuerza descarga con nombre real
+    safeUrl.searchParams.set("fl_attachment", archivo.nombre_archivo || "archivo.stl");
 
-    // REDIRECCIÓN CRÍTICA (307 mejor que 302 en APIs modernas)
+    const finalSafeUrl = safeUrl.href;
+
     return new Response(null, {
       status: 307,
       headers: {
-        Location: safeUrl,
+        Location: finalSafeUrl,
       },
     });
   } catch (error: any) {
