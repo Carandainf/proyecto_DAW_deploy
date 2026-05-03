@@ -56,12 +56,15 @@ export const GET: APIRoute = async ({ params, request }) => {
       finalUrl = `https://${finalUrl}`;
     }
 
-    let safeUrl = new URL(finalUrl);
+    let finalSafeUrl = finalUrl;
 
-    // fuerza descarga con nombre real
-    safeUrl.searchParams.set("fl_attachment", archivo.nombre_archivo || "archivo.stl");
-
-    const finalSafeUrl = safeUrl.href;
+    // fuerza descarga correctamente en Cloudinary
+    if (finalSafeUrl.includes("/raw/upload/")) {
+      const parts = finalSafeUrl.split("/raw/upload/");
+      finalSafeUrl = `${parts[0]}/raw/upload/fl_attachment:${encodeURIComponent(
+        archivo.nombre_archivo || "archivo.stl"
+      )}/${parts[1]}`;
+    }
 
     return new Response(null, {
       status: 307,
