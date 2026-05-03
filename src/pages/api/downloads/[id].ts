@@ -24,26 +24,33 @@ export const GET: APIRoute = async ({ params, request }) => {
   }
 
   try {
-    // Validar si la URL es de Cloudinary o local
     let finalUrl = archivo.url_path;
 
-    // Si la URL no empieza por http, es una ruta antigua local que ya no existe en Vercel
-    if (!finalUrl.startsWith("http")) {
+    // Reparación automática de la URL ---
+    // Si la ruta es puramente local (ej. "/uploads/archivo.stl"), fallamos.
+    if (finalUrl.startsWith("/")) {
       console.error("Intento de acceder a un archivo local en Vercel:", finalUrl);
       throw new Error("ARCHIVO_LOCAL_NO_SOPORTADO");
     }
 
-    const responseCloudinary = await fetch(finalUrl);
+    // Si la URL viene de Cloudinary pero le falta el https://, se lo añadimos
+    if (!finalUrl.startsWith("http")) {
+      finalUrl = `https://${finalUrl}`;
+    }
+
+    // Usamos new URL() para asegurar que los caracteres como nuestra querida "ñ" se procesen bien
+    const safeUrl = new URL(finalUrl).href;
+    // ----------------------------------------------------
+
+    const responseCloudinary = await fetch(safeUrl);
 
     if (!responseCloudinary.ok) {
-      // Si Cloudinary falla, lanzamos el error para mostrar tu HTML de "No disponible"
       throw new Error("CLOUDINARY_ERROR");
     }
 
-    // --- CAMBIO AQUÍ: Buffer en lugar de streaming directo ---
+    // Buffer en lugar de streaming directo para evitar cortes en Vercel
     const arrayBuffer = await responseCloudinary.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    // ---------------------------------------------------------
 
     return new Response(buffer, {
       status: 200,
@@ -54,10 +61,9 @@ export const GET: APIRoute = async ({ params, request }) => {
       },
     });
   } catch (error: any) {
-    // Registramos el error real en Vercel por si necesitamos depurar
     console.error("DEBUG_ERROR_DOWNLOAD:", error.message);
 
-    // Mantenemos tu HTML de error personalizado para que el usuario no vea un JSON feo
+    // HTML indicando que no encuentra el archivo
     const htmlError = `
       <!DOCTYPE html>
       <html lang="es">
