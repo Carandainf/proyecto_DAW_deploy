@@ -7,4 +7,7 @@ export default defineConfig({
     // A veces esto es necesario
     webAnalytics: { enabled: false },
   }),
+  security: {
+    checkOrigin: false, // Desactiva la comprobación estricta que esta chocando con Vercel
+  },
 });
