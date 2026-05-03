@@ -66,14 +66,14 @@ const historialCompleto = await prisma.archivo.findMany({
             type="text"
             id="searchBox"
             placeholder="BUSCAR CLIENTE O ARCHIVO..."
-            class="bg-dent-card border border-dent-border rounded-full pl-10 pr-6 py-3 text-[10px] font-black text-white outline-none focus:ring-2 focus:ring-dent-accent/50 focus:border-dent-accent transition-all placeholder:text-slate-600 w-full sm:w-[280px] uppercase tracking-widest"
+            class="bg-dent-card border border-dent-border rounded-full pl-10 pr-6 py-3 text-[10px] font-black text-white outline-none focus:ring-2 focus:ring-dent-accent/50 focus:border-dent-accent transition-all placeholder:text-slate-600 w-full sm:w-70 uppercase tracking-widest"
           />
         </div>
 
         <div class="relative w-full sm:w-auto">
           <select
             id="statusFilter"
-            class="appearance-none bg-dent-card border border-dent-border rounded-full px-6 py-3 text-[10px] font-black text-slate-200 uppercase outline-none cursor-pointer hover:border-dent-accent transition-all w-full sm:w-[180px] tracking-widest"
+            class="appearance-none bg-dent-card border border-dent-border rounded-full px-6 py-3 text-[10px] font-black text-slate-200 uppercase outline-none cursor-pointer hover:border-dent-accent transition-all w-full sm:w-45 tracking-widest"
           >
             <option value="all" class="bg-slate-900 text-white">MOSTRAR: TODO</option>
             <option value="pendiente" class="bg-slate-900 text-amber-500">PENDIENTES</option>
@@ -156,7 +156,7 @@ const historialCompleto = await prisma.archivo.findMany({
             {
               historialCompleto.map((t) => (
                 <tr
-                  class="history-row hover:bg-white/[0.02] transition-colors group"
+                  class="history-row hover:bg-white/2 transition-colors group"
                   data-status={t.estado}
                   data-search={`${t.nombre_archivo} ${t.usuario.name}`.toLowerCase()}
                 >

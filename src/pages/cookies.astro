@@ -1,8 +1,8 @@
 ---
 /**
  * PÁGINA: POLÍTICA DE COOKIES
- * @description Yo del futuro: Importante recordar que NO usamos cookies de terceros.
- * Solo usamos cookies de sesión (técnicas). Esto es un punto a favor en privacidad.
+ * @description Importante recordar que NO usamos cookies de terceros.
+ * Solo usamos cookies de sesión (técnicas).
  */
 import Layout from "../layouts/Layout.astro";
 ---
@@ -12,7 +12,7 @@ import Layout from "../layouts/Layout.astro";
     class="min-h-screen p-4 sm:p-8 flex justify-center items-start legal-layout bg-dent-bg transition-all"
   >
     <div
-      class="max-w-3xl w-full bg-dent-card border border-dent-border rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-blue-900/5 relative overflow-hidden"
+      class="max-w-3xl w-full bg-dent-card border border-dent-border rounded-4xl md:rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-blue-900/5 relative overflow-hidden"
     >
       <div class="absolute -top-24 -left-24 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px]">
       </div>
@@ -28,7 +28,7 @@ import Layout from "../layouts/Layout.astro";
 
       <div class="space-y-8 text-slate-500 text-sm md:text-base leading-relaxed relative z-10">
         <div
-          class="bg-emerald-500/5 border border-emerald-500/10 p-6 rounded-[1.5rem] flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+          class="bg-emerald-500/5 border border-emerald-500/10 p-6 rounded-3xl flex flex-col sm:flex-row gap-4 items-start sm:items-center"
         >
           <div
             class="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center shrink-0"
@@ -60,7 +60,7 @@ import Layout from "../layouts/Layout.astro";
           <h2
             class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
           >
-            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            <span class="w-4 h-0.5 bg-dent-accent/30"></span>
             1. ¿Qué son las cookies?
           </h2>
           <p class="pl-6 border-l-2 border-slate-50">
@@ -73,7 +73,7 @@ import Layout from "../layouts/Layout.astro";
           <h2
             class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
           >
-            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            <span class="w-4 h-0.5 bg-dent-accent/30"></span>
             2. Cookies Técnicas (Dashboard)
           </h2>
           <div class="pl-6 border-l-2 border-slate-50 space-y-4">
@@ -105,26 +105,23 @@ import Layout from "../layouts/Layout.astro";
         </section>
 
         <div class="pt-10 border-t border-slate-100 mt-12">
-          <a
-            href="/"
-            class="inline-flex items-center gap-3 text-slate-400 hover:text-dent-accent font-black text-[10px] uppercase tracking-[0.2em] transition-all group/link"
+          <button
+            onclick="history.back()"
+            class="inline-flex items-center gap-2 text-slate-500 hover:text-dent-accent transition-colors text-[10px] font-black uppercase tracking-widest mb-4 group cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="group-hover/link:-translate-x-1 transition-transform"
+              class="group-hover:-translate-x-1 transition-transform"
+              ><path d="m15 18-6-6 6-6"></path></svg
             >
-              <path d="m15 18-6-6 6-6"></path>
-            </svg>
-            Volver al inicio
-          </a>
+            Volver atrás
+          </button>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 ---
 /**
  * PÁGINA: AVISO LEGAL
- * @description Yo del futuro: Es una página estática, pero debe mantener
+ * @description Es una página estática, pero he mantenido el mismo diseño que el resto de la web para asegurar
  * la coherencia visual. He usado un max-w-3xl para que las líneas de texto
  * no sean infinitas, lo que mejora mucho la lectura.
  */
@@ -13,7 +13,7 @@ import Layout from "../layouts/Layout.astro";
     class="min-h-screen p-4 sm:p-8 flex justify-center items-start legal-layout bg-dent-bg transition-all"
   >
     <div
-      class="max-w-3xl w-full bg-dent-card border border-dent-border rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-blue-900/5 relative overflow-hidden"
+      class="max-w-3xl w-full bg-dent-card border border-dent-border rounded-4xl md:rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-blue-900/5 relative overflow-hidden"
     >
       <div class="absolute -top-24 -right-24 w-48 h-48 bg-dent-accent/5 rounded-full blur-3xl">
       </div>
@@ -32,7 +32,7 @@ import Layout from "../layouts/Layout.astro";
           <h2
             class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
           >
-            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            <span class="w-4 h-0.5 bg-dent-accent/30"></span>
             1. Información Identificativa
           </h2>
           <p class="pl-6 border-l-2 border-slate-50">
@@ -48,7 +48,7 @@ import Layout from "../layouts/Layout.astro";
           <h2
             class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
           >
-            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            <span class="w-4 h-0.5 bg-dent-accent/30"></span>
             2. Propiedad Intelectual
           </h2>
           <p class="pl-6 border-l-2 border-slate-50">
@@ -62,7 +62,7 @@ import Layout from "../layouts/Layout.astro";
           <h2
             class="text-dent-dark font-black uppercase text-[10px] tracking-[0.2em] mb-3 flex items-center gap-2 group-hover:text-dent-accent transition-colors"
           >
-            <span class="w-4 h-[2px] bg-dent-accent/30"></span>
+            <span class="w-4 h-0.5 bg-dent-accent/30"></span>
             3. Exclusión de Responsabilidad
           </h2>
           <p class="pl-6 border-l-2 border-slate-50">
@@ -72,26 +72,23 @@ import Layout from "../layouts/Layout.astro";
         </section>
 
         <div class="pt-10 border-t border-slate-100 mt-12">
-          <a
-            href="/"
-            class="inline-flex items-center gap-3 text-slate-400 hover:text-dent-accent font-black text-[10px] uppercase tracking-[0.2em] transition-all group/link"
+          <button
+            onclick="history.back()"
+            class="inline-flex items-center gap-2 text-slate-500 hover:text-dent-accent transition-colors text-[10px] font-black uppercase tracking-widest mb-4 group cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="group-hover/link:-translate-x-1 transition-transform"
+              class="group-hover:-translate-x-1 transition-transform"
+              ><path d="m15 18-6-6 6-6"></path></svg
             >
-              <path d="m15 18-6-6 6-6"></path>
-            </svg>
-            Volver al inicio
-          </a>
+            Volver atrás
+          </button>
         </div>
       </div>
     </div>
