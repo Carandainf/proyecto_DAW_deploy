@@ -1,8 +1,12 @@
+export const prerender = false;
+
 import type { APIRoute } from "astro";
 import { prisma } from "@/lib/prisma";
 import { getUserRole } from "@/lib/auth";
 
 export const GET: APIRoute = async ({ params, request }) => {
+  console.log("API DOWNLOAD HIT", params.id);
+
   const { id } = params;
   const { user, loggedIn, role } = await getUserRole(request);
 
