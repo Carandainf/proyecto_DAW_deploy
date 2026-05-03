@@ -75,12 +75,60 @@ export const GET: APIRoute = async ({ params, request }) => {
   } catch (error: any) {
     console.error("DOWNLOAD ERROR:", error.message);
 
-    return new Response(
-      JSON.stringify({
-        error: "Error en descarga",
-        detail: error.message,
-      }),
-      { status: 500 }
-    );
+    const htmlError = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Archivo no disponible</title>
+      <style>
+        body {
+          font-family: system-ui, sans-serif;
+          background-color: #0f172a;
+          color: #f8fafc;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          margin: 0;
+          text-align: center;
+        }
+        .box {
+          background: #1e293b;
+          padding: 40px;
+          border-radius: 16px;
+          border: 1px solid #334155;
+          max-width: 500px;
+        }
+        h1 { color: #06b6d4; }
+        p { color: #94a3b8; margin-bottom: 24px; }
+        button {
+          background: #06b6d4;
+          color: #020617;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="box">
+        <h1>Archivo no disponible</h1>
+        <p>Este archivo no existe o no está disponible actualmente.</p>
+        <button onclick="history.back()">Volver atrás</button>
+      </div>
+    </body>
+    </html>
+  `;
+
+    return new Response(htmlError, {
+      status: 404,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+      },
+    });
   }
 };
