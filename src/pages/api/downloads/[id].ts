@@ -15,7 +15,6 @@ export const GET: APIRoute = async ({ params, request }) => {
       return new Response(JSON.stringify({ error: "ID inválido" }), { status: 400 });
     }
 
-    // sesión (forma correcta en SSR/Vercel)
     const session = await auth.api.getSession({
       headers: request.headers,
     });
@@ -36,7 +35,6 @@ export const GET: APIRoute = async ({ params, request }) => {
       return new Response(JSON.stringify({ error: "Archivo no encontrado" }), { status: 404 });
     }
 
-    // permisos
     if (archivo.id_usuario !== user.id && user.role !== "admin") {
       console.log("FORBIDDEN", user.id, archivo.id_usuario);
       return new Response(JSON.stringify({ error: "Acceso denegado" }), { status: 403 });
@@ -46,30 +44,29 @@ export const GET: APIRoute = async ({ params, request }) => {
 
     console.log("URL ORIGINAL:", finalUrl);
 
-    // archivos locales no válidos en Vercel
     if (finalUrl.startsWith("/")) {
       throw new Error("ARCHIVO_LOCAL_NO_SOPORTADO");
     }
 
-    // asegurar protocolo
     if (!finalUrl.startsWith("http")) {
       finalUrl = `https://${finalUrl}`;
     }
 
-    let finalSafeUrl = finalUrl;
+    // ================================
+    // ✅ FIX CORRECTO CLOUINARY
+    // ================================
 
-    // fuerza descarga correctamente en Cloudinary
-    if (finalSafeUrl.includes("/raw/upload/")) {
-      const parts = finalSafeUrl.split("/raw/upload/");
-      finalSafeUrl = `${parts[0]}/raw/upload/fl_attachment:${encodeURIComponent(
-        archivo.nombre_archivo || "archivo.stl"
-      )}/${parts[1]}`;
+    const cloudinaryResponse = await fetch(finalUrl);
+
+    if (!cloudinaryResponse.ok) {
+      throw new Error("CLOUDINARY_FETCH_FAILED");
     }
 
-    return new Response(null, {
-      status: 307,
+    return new Response(cloudinaryResponse.body, {
+      status: 200,
       headers: {
-        Location: finalSafeUrl,
+        "Content-Type": "application/octet-stream",
+        "Content-Disposition": `attachment; filename="${archivo.nombre_archivo || "archivo.stl"}"`,
       },
     });
   } catch (error: any) {
