@@ -1,7 +1,6 @@
 ---
 /**
- * HISTORIAL DE TRABAJOS (CLIENTE)
- * @description Historial con buscador, filtro de estado y exportación PDF personalizada.
+ * HISTORIAL DE TRABAJOS (CLIENTE) - CORREGIDO
  */
 import Layout from "@/layouts/Layout.astro";
 import { protectRoute } from "@/lib/auth";
@@ -37,17 +36,15 @@ const todosLosTrabajos = await prisma.archivo.findMany({
             stroke="currentColor"
             stroke-width="3"
             class="group-hover:-translate-x-1 transition-transform"
+            ><path d="m15 18-6-6 6-6"></path></svg
           >
-            <path d="m15 18-6-6 6-6"></path>
-          </svg>
           Volver al panel
         </button>
-
         <h1 class="text-4xl md:text-5xl font-black text-white italic uppercase tracking-tighter">
           Historial <span class="text-dent-accent">Digital</span>
         </h1>
         <p class="text-slate-500 font-medium mt-2 max-w-md">
-          Gestión integral de archivos, estados de producción y comunicación con el laboratorio.
+          Gestión integral de archivos, estados y comunicación técnica.
         </p>
       </div>
 
@@ -56,9 +53,8 @@ const todosLosTrabajos = await prisma.archivo.findMany({
           type="text"
           id="searchBox"
           placeholder="BUSCAR TRABAJO..."
-          class="bg-dent-card border border-dent-border rounded-full px-6 py-3 text-[10px] font-black text-white outline-none focus:border-dent-accent transition-all w-full sm:w-[200px] uppercase tracking-widest"
+          class="bg-dent-card border border-dent-border rounded-full px-6 py-3 text-[10px] font-black text-white outline-none focus:border-dent-accent transition-all w-full sm:w-50 uppercase tracking-widest"
         />
-
         <select
           id="statusFilter"
           class="bg-dent-card border border-dent-border rounded-full px-6 py-3 text-[10px] font-black text-slate-200 uppercase outline-none cursor-pointer hover:border-dent-accent transition-all tracking-widest"
@@ -68,7 +64,6 @@ const todosLosTrabajos = await prisma.archivo.findMany({
           <option value="en_proceso">EN PROCESO</option>
           <option value="completado">COMPLETADO</option>
         </select>
-
         <button
           id="downloadPDF"
           class="bg-dent-accent hover:bg-white text-dent-dark px-6 py-3 rounded-full font-black text-[10px] tracking-widest transition-all shadow-xl shadow-cyan-500/10 flex items-center gap-2 uppercase group"
@@ -82,18 +77,16 @@ const todosLosTrabajos = await prisma.archivo.findMany({
             stroke="currentColor"
             stroke-width="2.5"
             class="group-hover:translate-y-0.5 transition-transform"
+            ><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline
+              points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg
           >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
           Exportar PDF
         </button>
       </div>
     </header>
 
     <div
-      class="bg-dent-card border border-dent-border rounded-[2rem] overflow-hidden shadow-2xl relative"
+      class="bg-dent-card border border-dent-border rounded-4xl overflow-hidden shadow-2xl relative"
     >
       <div class="overflow-x-auto no-scrollbar">
         <table class="w-full text-left border-collapse" id="historyTable">
@@ -119,7 +112,7 @@ const todosLosTrabajos = await prisma.archivo.findMany({
             {
               todosLosTrabajos.map((trabajo) => (
                 <tr
-                  class="history-row hover:bg-white/[0.02] transition-colors group"
+                  class="history-row hover:bg-white/2 transition-colors group"
                   data-status={trabajo.estado}
                   data-name={trabajo.nombre_archivo.toLowerCase()}
                 >
@@ -133,24 +126,55 @@ const todosLosTrabajos = await prisma.archivo.findMany({
                   </td>
                   <td class="p-6 text-center">
                     <span
-                      class={`inline-block px-4 py-1.5 rounded-full text-[9px] font-black uppercase border ${
-                        trabajo.estado === "pendiente"
-                          ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                          : trabajo.estado === "en_proceso"
-                            ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
-                            : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                      }`}
+                      class={`inline-block px-4 py-1.5 rounded-full text-[9px] font-black uppercase border ${trabajo.estado === "pendiente" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : trabajo.estado === "en_proceso" ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"}`}
                     >
                       {trabajo.estado.replace("_", " ")}
                     </span>
                   </td>
-                  <td class="p-6 text-right">
-                    <a
-                      href={`/api/downloads/${trabajo.id_archivo}`}
-                      class="text-slate-500 hover:text-dent-accent"
-                    >
-                      Descargar
-                    </a>
+                  <td class="p-6">
+                    <div class="flex justify-end items-center gap-4">
+                      <a
+                        href={`/api/downloads/${trabajo.id_archivo}`}
+                        class="text-slate-500 hover:text-dent-accent transition-colors"
+                        title="Descargar STL"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                        >
+                          <>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </>
+                        </svg>
+                      </a>
+                      <a
+                        href={`/dashboard/cliente/trabajo/${trabajo.id_archivo}`}
+                        class="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                        title="Ver mensajes y detalles"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                        >
+                          <>
+                            <circle cx="12" cy="12" r="3" />
+                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                          </>
+                        </svg>
+                      </a>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -169,17 +193,24 @@ const todosLosTrabajos = await prisma.archivo.findMany({
   src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"
 ></script>
 
-<script define:vars={{ todosLosTrabajos }}>
-  const searchBox = document.getElementById("searchBox");
-  const statusFilter = document.getElementById("statusFilter");
-  const rows = document.querySelectorAll(".history-row");
+<script>
+  // 1. Casting de tipos: Le decimos que son elementos de formulario específicos
+  const searchBox = document.getElementById("searchBox") as HTMLInputElement | null;
+  const statusFilter = document.getElementById("statusFilter") as HTMLSelectElement | null;
+  // Usamos HTMLElement para que reconozca la propiedad .style
+  const rows = document.querySelectorAll(".history-row") as NodeListOf<HTMLElement>;
 
   function filterTable() {
+    if (!searchBox || !statusFilter) return;
+
     const searchTerm = searchBox.value.toLowerCase();
     const statusTerm = statusFilter.value;
+
     rows.forEach((row) => {
-      const matchName = row.getAttribute("data-name").includes(searchTerm);
+      // Usamos encadenamiento opcional ?. y un valor por defecto "" para evitar el error de null
+      const matchName = (row.getAttribute("data-name") ?? "").includes(searchTerm);
       const matchStatus = statusTerm === "all" || row.getAttribute("data-status") === statusTerm;
+
       row.style.display = matchName && matchStatus ? "" : "none";
     });
   }
@@ -188,7 +219,10 @@ const todosLosTrabajos = await prisma.archivo.findMany({
   statusFilter?.addEventListener("change", filterTable);
 
   document.getElementById("downloadPDF")?.addEventListener("click", () => {
+    // @ts-ignore - Ignoramos jspdf porque viene de un CDN externo y TS no lo ve
     const { jsPDF } = window.jspdf;
+    if (!jsPDF) return;
+
     const doc = new jsPDF();
 
     doc.setFillColor(2, 6, 23);
@@ -199,15 +233,21 @@ const todosLosTrabajos = await prisma.archivo.findMany({
     doc.text("DENTAL LAB", 15, 25);
     doc.setFontSize(10);
     doc.setTextColor(150);
-    doc.text("INFORME DE PRODUCCIÓN DIGITAL", 15, 33);
-    doc.text(`Generado el: ${new Date().toLocaleString("es-ES")}`, 140, 25);
+    doc.text("MI HISTORIAL DE PRODUCCIÓN", 15, 33);
+    doc.text(`Generado el: ${new Date().toLocaleString("es-ES")}`, 130, 25);
 
-    const rowsData = todosLosTrabajos.map((t) => [
-      new Date(t.fecha_subida).toLocaleDateString("es-ES"),
-      t.nombre_archivo,
-      t.estado.toUpperCase().replace("_", " "),
-    ]);
+    // Filtramos las filas visibles
+    const visibleRows = Array.from(rows).filter((r) => r.style.display !== "none");
+    const rowsData = visibleRows.map((row) => {
+      const cells = row.querySelectorAll("td");
+      return [
+        cells[0]?.innerText.trim() ?? "",
+        cells[1]?.innerText.trim() ?? "",
+        cells[2]?.innerText.trim() ?? "",
+      ];
+    });
 
+    // @ts-ignore - jspdf-autotable también es externo
     doc.autoTable({
       startY: 50,
       head: [["FECHA", "ARCHIVO / REFERENCIA", "ESTADO"]],
