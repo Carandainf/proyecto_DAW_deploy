@@ -1,13 +1,12 @@
 import { defineConfig } from "astro/config";
-import vercel from "@astrojs/vercel/serverless"; // O 'serverless'
+import node from "@astrojs/node"; // <--- Cambio vercel por node
 
 export default defineConfig({
   output: "server",
-  adapter: vercel({
-    // A veces esto es necesario
-    webAnalytics: { enabled: false },
+  adapter: node({
+    mode: "standalone", // <--- Esto es necesario para Render
   }),
   security: {
-    checkOrigin: false, // Desactiva la comprobación estricta que esta chocando con Vercel
+    checkOrigin: false, // Lo mantengo por seguridad en los formularios
   },
 });
